@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/png" href="/GracePoint.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GracePoint | Platform Manajemen & Pelayanan Gereja </title>
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('gracepoint_theme_mode');
+        var isDark = saved !== null ? saved === 'dark' : true;
+        var root = document.documentElement;
+        root.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        root.classList.add(isDark ? 'theme-dark' : 'theme-light');
+      } catch (e) {}
+    })();
+  </script>
+</head>
+
+<body class="min-h-screen transition-colors duration-300">
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>

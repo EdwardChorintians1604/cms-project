@@ -1,0 +1,606 @@
+<script setup>
+import { ref, computed } from 'vue'
+import MainAdminLayout from '@/layouts/MainAdminLayout.vue'
+import Main_Admin_Card from '@/components/Main_Administrator/Main_Admin_Card.vue'
+import AOS from 'aos'
+import 'aos/dist/aos.css'
+
+// Database Connection Status
+const dbStatus = ref({
+  connected: true,
+  engine: 'PostgreSQL Serverless (Neon)',
+  database: 'gracepoint_db',
+  host: 'ep-cool-name-123456.ap-southeast-1.aws.neon.tech',
+  user: 'postgres_admin',
+  ssl: 'SSL Mode Require'
+})
+
+// Overview Statistics
+const chartColorMap = {
+  amber: '#fbbf24',
+  emerald: '#34d399',
+  sky: '#38bdf8',
+  indigo: '#818cf8'
+}
+
+const getChartColor = (color) => chartColorMap[color] || '#fbbf24'
+
+const sparklineOptions = {
+  chart: {
+    type: 'area',
+    height: 60,
+    sparkline: {
+      enabled: true
+    },
+  },
+  stroke: {
+    curve: 'smooth',
+    width: 2.5
+  },
+  fill: {
+    opacity: 0.3,
+    type: 'gradient',
+    gradient: {
+      shade: 'dark',
+      type: "vertical",
+      shadeIntensity: 0.5,
+      inverseColors: false,
+      opacityFrom: 0.6,
+      opacityTo: 0.1,
+      stops: [0, 90, 100]
+    }
+  },
+  tooltip: {
+    enabled: false,
+  },
+  xaxis: {
+    crosshairs: {
+      width: 1
+    },
+  },
+  yaxis: {
+    min: 0
+  },
+}
+
+const stats = ref([
+  { title: 'Gereja Terdaftar', value: '12', subtitle: 'Gereja aktif di portal', color: 'amber', series: [{ data: [2, 5, 8, 7, 9, 11, 12] }] },
+  { title: 'Administrator Utama', value: '3', subtitle: 'Hak akses superadmin', color: 'emerald', series: [{ data: [1, 2, 2, 3, 3, 3, 3] }] },
+  { title: 'Total Jemaat Terdata', value: '4,520', subtitle: 'Di seluruh cabang gereja', color: 'sky', series: [{ data: [2100, 2500, 3100, 3800, 4050, 4200, 4520] }] },
+  { title: 'Beban Server (%)', value: '18%', subtitle: 'CPU & Memory Usage', color: 'indigo', series: [{ data: [30, 25, 40, 20, 45, 35, 18] }] }
+])
+
+// Recent Churches List
+const recentChurches = ref([
+  { id: 1, name: 'GracePoint Central Church', code: 'GP-001', admin: 'ambatukam09@gmail.com', status: 'Aktif', date: '2026-08-01' },
+  { id: 2, name: 'GracePoint North Assembly', code: 'GP-002', admin: 'admin.north@gracepoint.org', status: 'Aktif', date: '2026-08-05' },
+  { id: 3, name: 'GracePoint South Community', code: 'GP-003', admin: 'admin.south@gracepoint.org', status: 'Pending Verification', date: '2026-08-09' }
+])
+
+// System Audit Logs
+const systemLogs = ref([
+  { time: '20:15:02', event: 'Superadmin Authenticated', level: 'INFO', user: 'ambatukam09@gmail.com' },
+  { time: '19:40:11', event: 'PostgreSQL Connection Established', level: 'SUCCESS', user: 'postgres' },
+  { time: '18:12:45', event: 'New Church Registration Requested', level: 'NOTICE', user: 'GracePoint South' }
+])
+
+// ==========================================
+// USER MANAGEMENT STATE (HAK AKSES & AKUN)
+// ==========================================
+const activeRoleTab = ref('all') // 'all' | 'superadmin' | 'church_admin' | 'user'
+const searchUserQuery = ref('')
+
+const userList = ref([
+  { id: 1, full_name: 'Super Admin Developer', email: 'ambatukam09@gmail.com', role: 'superadmin', church: 'Pusat (System)', is_active: true, created_at: '2026-01-10' },
+  { id: 2, full_name: 'Rev. Daniel Wijaya', email: 'admin.north@gracepoint.org', role: 'church_admin', church: 'GracePoint North Assembly', is_active: true, created_at: '2026-02-14' },
+  { id: 3, full_name: 'Budi Santoso', email: 'budi.santoso@gmail.com', role: 'user', church: 'GracePoint Central Church', is_active: true, created_at: '2026-03-01' },
+  { id: 4, full_name: 'Sarah Kurniawan', email: 'sarah.k@gmail.com', role: 'user', church: 'GracePoint Central Church', is_active: true, created_at: '2026-04-12' },
+  { id: 5, full_name: 'Michael Tan', email: 'admin.south@gracepoint.org', role: 'church_admin', church: 'GracePoint South Community', is_active: false, created_at: '2026-05-20' },
+  { id: 6, full_name: 'Admin Platform 2', email: 'superadmin2@gracepoint.org', role: 'superadmin', church: 'Pusat (System)', is_active: true, created_at: '2026-06-05' }
+])
+
+const filteredUsers = computed(() => {
+  return userList.value.filter(u => {
+    const matchesTab = activeRoleTab.value === 'all' || u.role === activeRoleTab.value
+    const matchesQuery = !searchUserQuery.value || 
+      u.full_name.toLowerCase().includes(searchUserQuery.value.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchUserQuery.value.toLowerCase()) ||
+      u.church.toLowerCase().includes(searchUserQuery.value.toLowerCase())
+    return matchesTab && matchesQuery
+  })
+})
+
+const isAddUserModalOpen = ref(false)
+const newUserForm = ref({
+  full_name: '',
+  email: '',
+  role: 'user',
+  church: 'GracePoint Central Church',
+  password: ''
+})
+
+const handleAddUser = () => {
+  if (!newUserForm.value.email || !newUserForm.value.full_name) return
+  userList.value.unshift({
+    id: Date.now(),
+    full_name: newUserForm.value.full_name,
+    email: newUserForm.value.email,
+    role: newUserForm.value.role,
+    church: newUserForm.value.church || 'GracePoint Central Church',
+    is_active: true,
+    created_at: new Date().toISOString().split('T')[0]
+  })
+  newUserForm.value = { full_name: '', email: '', role: 'user', church: 'GracePoint Central Church', password: '' }
+  isAddUserModalOpen.value = false
+}
+
+const toggleUserActive = (user) => {
+  user.is_active = !user.is_active
+}
+
+const changeUserRole = (user, newRole) => {
+  user.role = newRole
+}
+
+const deleteUser = (userId) => {
+  userList.value = userList.value.filter(u => u.id !== userId)
+}
+
+// ==========================================
+// BACKUP & RESTORE SERVER STATE
+// ==========================================
+const backups = ref([
+  { id: 'BK-20260818-01', filename: 'neon_backup_20260818_190000.sql', size: '14.2 MB', created_at: '2026-08-18 19:00:00', status: 'Completed', type: 'Auto Snapshot' },
+  { id: 'BK-20260817-01', filename: 'neon_backup_20260817_000000.sql', size: '13.8 MB', created_at: '2026-08-17 00:00:00', status: 'Completed', type: 'Daily Backup' },
+  { id: 'BK-20260816-01', filename: 'neon_backup_20260816_000000.sql', size: '13.5 MB', created_at: '2026-08-16 00:00:00', status: 'Completed', type: 'Daily Backup' }
+])
+
+const isBackupLoading = ref(false)
+
+const triggerBackup = () => {
+  isBackupLoading.value = true
+  setTimeout(() => {
+    const now = new Date()
+    const timestampStr = now.toISOString().replace(/[-:T.]/g, '').slice(0, 14)
+    backups.value.unshift({
+      id: `BK-${timestampStr.slice(0, 8)}-${Math.floor(Math.random()*90 + 10)}`,
+      filename: `neon_backup_${timestampStr}.sql`,
+      size: '14.5 MB',
+      created_at: now.toLocaleString(),
+      status: 'Completed',
+      type: 'Manual Trigger'
+    })
+    isBackupLoading.value = false
+  }, 1200)
+}
+
+// Data statistik gereja (ganti dengan API call)
+const churchStats = ref([
+  { year: 2020, count: 5 },
+  { year: 2021, count: 8 },
+  { year: 2022, count: 12 },
+  { year: 2023, count: 18 },
+  { year: 2024, count: 25 },
+  { year: 2025, count: 32 },
+  { year: 2026, count: 15 },
+])
+
+const maxCount = computed(() => Math.max(...churchStats.value.map(d => d.count)))
+
+const totalChurches = computed(() => 
+  churchStats.value.reduce((sum, d) => sum + d.count, 0)
+)
+
+const thisYearCount = computed(() => 
+  churchStats.value.find(d => d.year === 2026)?.count || 0
+)
+
+const growthRate = computed(() => {
+  const thisYear = churchStats.value.find(d => d.year === 2026)?.count || 0
+  const lastYear = churchStats.value.find(d => d.year === 2025)?.count || 0
+  return lastYear > 0 ? Math.round(((thisYear - lastYear) / lastYear) * 100) : 0
+})
+</script>
+
+<template>
+  <MainAdminLayout>
+    <div class="space-y-8">
+      
+      <!-- Welcome Header -->
+      <div id="data" class="relative overflow-hidden bg-slate-900/70 border border-amber-500/20 p-6 rounded-2xl shadow-2xl backdrop-blur-xl">
+        <!-- Background Patterns -->
+        <div class="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-20 pointer-events-none"></div>
+        <div class="absolute -top-1/4 -right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          
+          <div class="flex items-center gap-5">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-br from-amber-500/20 to-slate-900 border border-amber-500/30 flex items-center justify-center shrink-0 shadow-lg">
+              <svg class="w-8 h-8 sm:w-10 sm:h-10 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826 3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-100 tracking-tight">Selamat Datang, Superadmin</h1>
+              <p class="text-slate-400 text-sm mt-1 max-w-2xl">Kelola pendaftaran gereja, manajemen akun, pemantauan server & backup database PostgreSQL dari konsol utama.</p>
+            </div>
+          </div>
+
+          <router-link 
+            to="/daftar-gereja"
+            class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 shrink-0"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span>Daftar Gereja Baru</span>
+          </router-link>
+
+        </div>
+      </div>
+
+      <br><br>
+
+      <!-- Stats Grid (Overview) -->
+      <div id="analytics" class="space-y-3">
+        <h2 class="text-xs font-bold uppercase tracking-widest text-amber-400/90 flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+          Ringkasan Grafik & Statistika Utama 
+        </h2>
+        <br><br>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+          <Main_Admin_Card 
+            v-for="(item, idx) in stats" 
+            :key="idx" 
+            :title="item.title" 
+            :subtitle="item.subtitle"
+            :class="[`border-${item.color}-500/20`, 'overflow-hidden']"
+          >
+            <div class="flex items-end justify-between gap-3 mt-2">
+              <div :class="['text-2xl sm:text-3xl font-extrabold tracking-tight', `text-${item.color}-400`]">
+                {{ item.value }}
+              </div>
+            </div>
+
+            <div class="w-24 sm:w-28 -mr-2 -mb-4 mt-3 ml-auto">
+              <apexchart
+                type="area"
+                height="60"
+                :options="{ ...sparklineOptions, colors: [getChartColor(item.color)] }"
+                :series="item.series"
+              />
+            </div>
+          </Main_Admin_Card>
+        </div>
+      </div>
+
+      <!-- Main Content Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left Column: Churches & Security (2 cols) -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- GANTI BAGIAN INI (baris 250-304) -->
+<div id="verifikasi-gereja" class="bg-slate-900/80 border border-amber-500/20 rounded-2xl p-6 shadow-xl backdrop-blur-md">
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h2 class="text-lg font-bold text-white flex items-center gap-2">
+        <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        Statistik Pendaftaran Gereja
+      </h2>
+      <p class="text-xs text-slate-400">Grafik pertumbuhan jumlah gereja yang mendaftar per tahun</p>
+    </div>
+    <router-link 
+      to="/admin/churches"
+      class="flex items-center gap-2 px-4 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-105 active:scale-95"
+    >
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+      </svg>
+      Lihat Semua Gereja
+    </router-link>
+  </div>
+
+  <!-- Grafik -->
+  <div class="relative h-64 w-full mb-4">
+    <svg class="w-full h-full" viewBox="0 0 600 240" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="barGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#fbbf24" />
+          <stop offset="100%" stop-color="#d97706" />
+        </linearGradient>
+      </defs>
+      
+      <!-- Grid lines -->
+      <line x1="50" y1="200" x2="580" y2="200" stroke="rgba(148,163,184,0.1)" stroke-width="1"/>
+      <line x1="50" y1="150" x2="580" y2="150" stroke="rgba(148,163,184,0.1)" stroke-width="1"/>
+      <line x1="50" y1="100" x2="580" y2="100" stroke="rgba(148,163,184,0.1)" stroke-width="1"/>
+      <line x1="50" y1="50" x2="580" y2="50" stroke="rgba(148,163,184,0.1)" stroke-width="1"/>
+      
+      <!-- Bars -->
+      <rect 
+        v-for="(item, i) in churchStats" 
+        :key="item.year"
+        :x="70 + i * 70"
+        :y="200 - (item.count / maxCount) * 170"
+        width="40"
+        :height="(item.count / maxCount) * 170"
+        fill="url(#barGradient)"
+        rx="4"
+        class="transition-all duration-700 ease-out cursor-pointer hover:opacity-80"
+      />
+      
+      <!-- Count labels -->
+      <text 
+        v-for="(item, i) in churchStats" 
+        :key="'label-'+item.year"
+        :x="70 + i * 70 + 20"
+        :y="200 - (item.count / maxCount) * 170 - 8"
+        text-anchor="middle"
+        fill="#fbbf24"
+        font-size="11"
+        font-weight="bold"
+      >
+        {{ item.count }}
+      </text>
+      
+      <!-- Axes -->
+      <line x1="50" y1="200" x2="580" y2="200" stroke="rgba(148,163,184,0.3)" stroke-width="1"/>
+      <line x1="50" y1="200" x2="50" y2="30" stroke="rgba(148,163,184,0.3)" stroke-width="1"/>
+      
+      <!-- Y-axis labels -->
+      <text x="40" y="205" fill="#94a3b8" font-size="10" text-anchor="end">0</text>
+      <text x="40" y="155" fill="#94a3b8" font-size="10" text-anchor="end">{{ Math.round(maxCount * 0.33) }}</text>
+      <text x="40" y="105" fill="#94a3b8" font-size="10" text-anchor="end">{{ Math.round(maxCount * 0.66) }}</text>
+      <text x="40" y="55" fill="#94a3b8" font-size="10" text-anchor="end">{{ maxCount }}</text>
+      
+      <!-- X-axis labels -->
+      <text 
+        v-for="(item, i) in churchStats" 
+        :key="'year-'+item.year"
+        :x="70 + i * 70 + 20"
+        y="220"
+        text-anchor="middle"
+        fill="#94a3b8"
+        font-size="10"
+      >
+        {{ item.year }}
+      </text>
+    </svg>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-3 gap-4 mt-4">
+    <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4 text-center">
+      <p class="text-2xl font-bold text-emerald-400">{{ totalChurches }}</p>
+      <p class="text-xs text-slate-400 mt-1">Total Gereja Terdaftar</p>
+    </div>
+    <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4 text-center">
+      <p class="text-2xl font-bold text-amber-400">{{ thisYearCount }}</p>
+      <p class="text-xs text-slate-400 mt-1">Pendaftaran Tahun Ini</p>
+    </div>
+    <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-4 text-center">
+      <p class="text-2xl font-bold" :class="growthRate >= 0 ? 'text-emerald-400' : 'text-red-400'">
+        {{ growthRate >= 0 ? '+' : '' }}{{ growthRate }}%
+      </p>
+      <p class="text-xs text-slate-400 mt-1">Pertumbuhan YoY</p>
+    </div>
+  </div>
+</div>
+
+          <!-- Security Audit Logs -->
+          <div id="security" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl">
+            <h2 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+              Audit Keamanan & Log Aktivitas Sistem
+            </h2>
+
+            <div class="space-y-2">
+              <div 
+                v-for="(log, lIdx) in systemLogs" 
+                :key="lIdx"
+                class="flex items-center justify-between p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-xs"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="font-mono text-slate-400 text-[11px]">{{ log.time }}</span>
+                  <span class="font-semibold text-slate-200">{{ log.event }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-slate-400 font-mono text-[10px] hidden sm:inline">{{ log.user }}</span>
+                  <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                    {{ log.level }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ======================================================= -->
+      <!-- SECTION: MANAJEMEN PENGGUNA TERPUSAT (USERS & ADMIN)    -->
+      <!-- ======================================================= -->
+      <div id="users" class="space-y-6 pt-4 border-t border-slate-800">
+        <div id="admin-cabang" class="bg-slate-900/90 border border-amber-500/30 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
+          
+          <!-- Header & Controls -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase">
+                  MANAJEMEN PENGGUNA TERPUSAT
+                </span>
+              </div>
+              <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
+                Kelola Seluruh Akun (Admin Utama, Admin Cabang, & Jemaat)
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Kelola hak akses role pengguna, aktivasi akun, dan pembuatan akun baru dalam satu konsol terpusat.</p>
+            </div>
+
+            <!-- Add User Button -->
+            <button 
+              @click="isAddUserModalOpen = true"
+              class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 cursor-pointer shrink-0"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span>Tambah User / Admin</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ======================================================= -->
+      <!-- SECTION: BACKUP & RESTORE SERVER POSTGRESQL             -->
+      <!-- ======================================================= -->
+      <div id="backup" class="space-y-6 pt-4 border-t border-slate-800">
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase">
+                  INFRASTRUKTUR SERVER
+                </span>
+              </div>
+              <h2 class="text-xl font-extrabold text-white flex items-center gap-2">
+                <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8"/>
+                </svg>
+                Backup & Pemulihan Database PostgreSQL Server
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Kelola salinan cadangan (*SQL Dump*) dan restore point PostgreSQL cloud Neon.</p>
+            </div>
+
+            <!-- Instant Backup Button -->
+            <button 
+              @click="triggerBackup"
+              :disabled="isBackupLoading"
+              class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-xs shadow-lg shadow-indigo-500/20 transition flex items-center gap-2 cursor-pointer shrink-0"
+            >
+              <svg :class="['w-4 h-4', { 'animate-spin': isBackupLoading }]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              <span>{{ isBackupLoading ? 'Membuat Backup...' : 'Trigger Backup Instant' }}</span>
+            </button>
+          </div>
+
+          <!-- Backup List Table -->
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-950/80 text-indigo-300 font-bold uppercase border-b border-indigo-500/20">
+                <tr>
+                  <th class="py-3 px-4">Nama Berkas SQL</th>
+                  <th class="py-3 px-4">Tipe Backup</th>
+                  <th class="py-3 px-4">Ukuran</th>
+                  <th class="py-3 px-4">Waktu Pembuatan</th>
+                  <th class="py-3 px-4">Status</th>
+                  <th class="py-3 px-4 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60 text-slate-300">
+                <tr v-for="b in backups" :key="b.id" class="hover:bg-slate-800/40 transition">
+                  <td class="py-3.5 px-4 font-mono font-bold text-slate-200">{{ b.filename }}</td>
+                  <td class="py-3.5 px-4 text-slate-400">{{ b.type }}</td>
+                  <td class="py-3.5 px-4 font-mono text-amber-400">{{ b.size }}</td>
+                  <td class="py-3.5 px-4 text-slate-400 font-mono">{{ b.created_at }}</td>
+                  <td class="py-3.5 px-4">
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                      {{ b.status }}
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-right">
+                    <button class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-indigo-500/20 text-indigo-300 border border-slate-700 hover:border-indigo-500/40 font-semibold text-[11px] transition cursor-pointer">
+                      Download .SQL
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- MODAL: TAMBAH USER / ADMIN BARU                        -->
+    <!-- ======================================================= -->
+    <Transition name="modal">
+      <div v-if="isAddUserModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+              </svg>
+              Tambah Pengguna Baru
+            </h3>
+            <button @click="isAddUserModalOpen = false" class="text-slate-400 hover:text-white">✕</button>
+          </div>
+
+          <form @submit.prevent="handleAddUser" class="space-y-4 text-xs">
+            <div>
+              <label class="block text-slate-300 font-semibold mb-1">Nama Lengkap</label>
+              <input v-model="newUserForm.full_name" required type="text" placeholder="Masukkan nama..." class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 text-white rounded-xl p-2.5 outline-none" />
+            </div>
+
+            <div>
+              <label class="block text-slate-300 font-semibold mb-1">Email</label>
+              <input v-model="newUserForm.email" required type="email" placeholder="user@domain.com" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 text-white rounded-xl p-2.5 outline-none" />
+            </div>
+
+            <div>
+              <label class="block text-slate-300 font-semibold mb-1">Role / Hak Akses</label>
+              <select v-model="newUserForm.role" class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 text-white rounded-xl p-2.5 outline-none">
+                <option value="superadmin">🛡️ Admin Utama (Superadmin)</option>
+                <option value="church_admin">⛪ Admin Cabang Gereja</option>
+                <option value="user">✝️ User / Jemaat</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-slate-300 font-semibold mb-1">Cabang Gereja</label>
+              <input v-model="newUserForm.church" type="text" placeholder="Nama cabang gereja..." class="w-full bg-slate-950 border border-slate-800 focus:border-amber-500 text-white rounded-xl p-2.5 outline-none" />
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+              <button type="button" @click="isAddUserModalOpen = false" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 font-semibold">Batal</button>
+              <button type="submit" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold">Simpan User</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Transition>
+
+  </MainAdminLayout>
+</template>
+
+<style scoped>
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.modal-enter-active, .modal-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.modal-enter-from, .modal-leave-to {
+  opacity: 0;
+  transform: scale(0.95);
+}
+</style>

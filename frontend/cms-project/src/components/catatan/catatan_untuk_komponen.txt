@@ -1,0 +1,66 @@
+====================================================================
+           CATATAN DOKUMENTASI: FOLDER SRC/COMPONENTS
+====================================================================
+
+📁 LOKASI: src/components/
+
+📌 APA ITU FOLDER COMPONENTS?
+--------------------------------------------------------------------
+Folder `src/components/` adalah tempat penyimpanan untuk semua 
+"Komponen UI Reusabel" (komponen antarmuka yang dapat digunakan 
+berkali-kali di berbagai halaman aplikasi Vue.js).
+
+Komponen di folder ini bersifat independen, kecil, dan terfokus pada 
+satu tugas tampilan tertentu.
+
+
+🎯 FUNGSI & KEGUNAAN UTAMA:
+--------------------------------------------------------------------
+1. Reusability (Dapat Digunakan Kembali):
+   Menghindari penulisan ulang kode HTML/CSS yang sama di banyak 
+   halaman. Cukup buat komponen sekali, lalu panggil di mana saja.
+
+2. Modularitas & Kemudahan Maintenance:
+   Jika ada perubahan desain (misalnya pada Navbar), Anda hanya perlu 
+   mengubah file `Navbar.vue` di folder ini, dan seluruh halaman akan 
+   otomatis terbarui.
+
+3. Enkapsulasi Kode (Scope Isolation):
+   Logika tampilan (HTML), gaya (CSS scoped), dan perilaku reaktif 
+   (JavaScript) dibungkus secara rapi dalam satu file `.vue`.
+
+
+⚖️ PERBEDAAAN: COMPONENTS vs PAGES
+--------------------------------------------------------------------
+- `src/components/`:
+  Berisi elemen UI kecil/bagian dari halaman (contoh: Navbar, Button, 
+  Card, Modal, Footer). Tidak memiliki Rute/URL sendiri.
+
+- `src/pages/` (atau `src/views/`):
+  Berisi seluruh tampilan halaman (contoh: HomeView.vue, LoginView.vue). 
+  Memiliki URL/Rute di `router/index.js` dan merakit beberapa `components` 
+  di dalamnya.
+
+
+🧩 KOMPONEN YANG ADA SAAT INI DI PROJECT:
+--------------------------------------------------------------------
+1. Navbar.vue
+   - Fungsi: Menampilkan navigasi utama di bagian atas aplikasi 
+     (Logo Gereja, Menu Beranda, Jadwal, Live Stream, Donasi, Profil User).
+
+2. Sidebar.vue
+   - Fungsi: Menampilkan menu navigasi samping (Dashboard, Halaman Login).
+
+3. Card.vue
+   - Fungsi: Wadah (Container) tampilan dengan efek Glassmorphism untuk 
+     menampilkan statistik, formulir, atau ringkasan informasi.
+
+
+💡 BEST PRACTICES (PANDUAN PENULISAN):
+--------------------------------------------------------------------
+- Gunakan nama file berbentuk PascalCase (Contoh: `UserCard.vue`, `BaseButton.vue`).
+- Gunakan `<script setup>` (Vue 3 Composition API).
+- Manfaatkan `props` untuk menerima data dari parent dan `slots` untuk 
+  menyisipkan konten dinamis.
+- Gunakan `<style scoped>` agar CSS komponen tidak merusak halaman lain.
+====================================================================

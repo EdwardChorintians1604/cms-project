@@ -1,0 +1,15 @@
+{
+      path: '/info-pelayanan',
+      name: 'info-pelayanan',
+      component: InfoPelayanan,
+    },
+    {
+      path: '/berita-jemaat',
+      name: 'berita-jemaat',
+      component: BeritaJemaat,
+    },
+    {
+      path: '/hari-beasr-gereja',
+      name: 'hari-beasr-gereja',
+      component: HariBesarGereja,
+    },

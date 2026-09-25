@@ -1,0 +1,30 @@
+backend/app/keuangan_gereja/
+├── models/
+│   ├── pemasukan.py
+│   ├── pengeluaran.py
+│   ├── anggaran.py
+│   └── audit_transaksi.py
+├── schemas/
+│   ├── pemasukan.py
+│   ├── pengeluaran.py
+│   └── laporan.py
+├── services/
+│   ├── pemasukan_service.py
+│   ├── pengeluaran_service.py
+│   ├── saldo_service.py
+│   └── laporan_service.py
+├── analytics/
+│   ├── analisis_deskriptif.py
+│   ├── forecasting.py
+│   ├── deteksi_anomali.py
+│   └── rasio_keuangan.py
+├── fuzzy/
+│   └── kesehatan_keuangan.py
+├── spk/
+│   └── prioritas_program.py
+├── api/
+│   └── keuangan.py
+└── tests/
+    ├── test_pemasukan.py
+    ├── test_pengeluaran.py
+    └── test_hak_akses.py

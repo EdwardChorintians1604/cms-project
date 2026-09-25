@@ -1,0 +1,1 @@
+<!-- Bagian ini bertujuan untuk mengkoneksikan tampilan user (ketika sudah masuk) yang mengharuskan mereka mencari gereja yang mereka tempati dan membantu mencari tempat ibadah yang sering mereka masuki -->

@@ -1,0 +1,637 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *, .dark, .dark *));
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GRACEPOINT THEME SYSTEM — DUAL PALETTE & INTEGRASI UNIVERSAL
+   
+   TEMA GELAP  : Biru Tua (#0a1525), Hitam (#050811), Hijau Tua (#052e16), Emas (#f59e0b)
+   TEMA TERANG : Putih (#ffffff), Biru Muda (#f0f9ff), Hijau Muda (#16a34a), Emas (#d97706)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─── DARK THEME (DEFAULT) ──────────────────────────────────────────────── */
+:root,
+html[data-theme="dark"],
+html.theme-dark,
+html.dark {
+  /* Background layers (Hitam & Biru Tua) */
+  --theme-bg-primary: #050811;
+  /* Hitam pekat */
+  --theme-bg-secondary: #0a1525;
+  /* Biru tua */
+  --theme-bg-tertiary: #0f203c;
+  /* Biru tua aksen */
+  --theme-bg-surface: #081022;
+  /* Hitam kebiruan */
+  --theme-bg-overlay: rgba(5, 8, 17, 0.95);
+  --theme-bg-card: #0c182f;
+
+  /* Hijau Tua */
+  --theme-green-dark: #052e16;
+  --theme-green: #15803d;
+  --theme-green-muted: rgba(21, 128, 61, 0.18);
+  --theme-green-border: rgba(21, 128, 61, 0.35);
+
+  /* Emas */
+  --theme-gold: #f59e0b;
+  --theme-gold-light: #fbbf24;
+  --theme-gold-dark: #d97706;
+  --theme-gold-muted: rgba(245, 158, 11, 0.15);
+  --theme-gold-border: rgba(245, 158, 11, 0.30);
+
+  /* Biru Tua */
+  --theme-blue-dark: #0a1525;
+  --theme-blue: #1d4ed8;
+  --theme-blue-muted: rgba(29, 78, 216, 0.18);
+
+  /* Text (Kontras di Gelap) */
+  --theme-text-primary: #f8fafc;
+  --theme-text-secondary: #cbd5e1;
+  --theme-text-muted: #64748b;
+  --theme-text-inverse: #050811;
+
+  /* Borders & Shadows */
+  --theme-border: rgba(245, 158, 11, 0.22);
+  --theme-border-soft: rgba(255, 255, 255, 0.08);
+  --theme-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --theme-shadow-gold: 0 4px 24px rgba(245, 158, 11, 0.18);
+
+  /* Components */
+  --theme-navbar-bg: rgba(7, 11, 25, 0.97);
+  --theme-navbar-border: rgba(245, 158, 11, 0.22);
+  --theme-footer-bg: #050811;
+  --theme-toggle-bg: #0f1d38;
+  --theme-toggle-knob: #f59e0b;
+}
+
+/* ─── LIGHT THEME ──────────────────────────────────────────────────────── */
+html[data-theme="light"],
+html.theme-light,
+html.light {
+  /* Background layers (Putih & Biru Muda) */
+  --theme-bg-primary: #ffffff;
+  /* Putih bersih */
+  --theme-bg-secondary: #f0f9ff;
+  /* Biru muda lembut */
+  --theme-bg-tertiary: #e0f2fe;
+  /* Biru muda panel */
+  --theme-bg-surface: #ffffff;
+  /* Putih surface */
+  --theme-bg-overlay: rgba(255, 255, 255, 0.96);
+  --theme-bg-card: #f8fafc;
+  /* Putih keabu lembut */
+
+  /* Hijau Muda */
+  --theme-green-dark: #166534;
+  --theme-green: #16a34a;
+  /* Hijau muda aktif */
+  --theme-green-muted: rgba(22, 163, 74, 0.14);
+  --theme-green-border: rgba(22, 163, 74, 0.30);
+  --theme-green-light: #d1fae5;
+  /* Hijau muda pastel */
+
+  /* Emas (Kontras di latar putih) */
+  --theme-gold: #d97706;
+  /* Emas pekat untuk kontras terang */
+  --theme-gold-light: #f59e0b;
+  --theme-gold-dark: #b45309;
+  --theme-gold-muted: rgba(217, 119, 6, 0.12);
+  --theme-gold-border: rgba(217, 119, 6, 0.35);
+
+  /* Biru Muda */
+  --theme-blue-dark: #0284c7;
+  --theme-blue: #0284c7;
+  --theme-blue-muted: rgba(14, 165, 233, 0.14);
+  --theme-blue-light: #e0f2fe;
+
+  /* Text (Kontras di Terang) */
+  --theme-text-primary: #0f172a;
+  /* Slate pekat */
+  --theme-text-secondary: #334155;
+  --theme-text-muted: #64748b;
+  --theme-text-inverse: #ffffff;
+
+  /* Borders & Shadows */
+  --theme-border: rgba(217, 119, 6, 0.28);
+  --theme-border-soft: rgba(15, 23, 42, 0.10);
+  --theme-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+  --theme-shadow-gold: 0 4px 20px rgba(217, 119, 6, 0.18);
+
+  /* Components */
+  --theme-navbar-bg: rgba(255, 255, 255, 0.98);
+  --theme-navbar-border: rgba(217, 119, 6, 0.25);
+  --theme-footer-bg: #f0f9ff;
+  --theme-toggle-bg: #bae6fd;
+  --theme-toggle-knob: #d97706;
+}
+
+/* ─── GLOBAL SMOOTH TRANSITION (TIDAK BERUBAH SECARA MENDADAK) ───────────── */
+*,
+*::before,
+*::after {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+input,
+textarea,
+select,
+button,
+a {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* ─── BASE STYLES ───────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: var(--theme-bg-primary);
+  color: var(--theme-text-primary);
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ADAPTIVE STYLES FOR LIGHT THEME (MENYELURUH DI SEMUA ELEMEN & HALAMAN)
+   ═══════════════════════════════════════════════════════════════════════════ */
+html[data-theme="light"],
+html.theme-light,
+html.light {
+
+  /* ─── 1. NAVBAR & ANNOUNCEMENT BAR ─────────────────────────────────────── */
+  .classic-navbar,
+  header.bg-\[\#0f172a\],
+  header.bg-\[\#070b15\],
+  header.bg-\[\#0a101d\],
+  header.bg-slate-900,
+  header.bg-slate-950,
+  header {
+    background-color: var(--theme-navbar-bg) !important;
+    border-color: var(--theme-navbar-border) !important;
+    color: var(--theme-text-primary) !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  .classic-navbar>div:first-child,
+  header>div:first-child.bg-slate-800,
+  header>div:first-child.bg-gradient-to-r {
+    background: linear-gradient(90deg, #ecfdf5 0%, #e0f2fe 50%, #fef3c7 100%) !important;
+    border-color: rgba(217, 119, 6, 0.3) !important;
+    color: #b45309 !important;
+  }
+
+  .classic-navbar>div:first-child span,
+  header>div:first-child.bg-slate-800 span {
+    color: #92400e !important;
+  }
+
+  /* ─── 2. SIDEBARS ──────────────────────────────────────────────────────── */
+  .nav-sidebar,
+  aside,
+  aside[class*="bg-slate-900"],
+  aside[class*="bg-slate-950"],
+  aside[class*="bg-[#0f172a]"],
+  aside[class*="bg-[#0a101d]"] {
+    background-color: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    color: var(--theme-text-primary) !important;
+    box-shadow: 4px 0 24px rgba(15, 23, 42, 0.06) !important;
+  }
+
+  .sidebar-link {
+    color: #1e293b !important;
+  }
+
+  .sidebar-link:hover {
+    color: #d97706 !important;
+    background-color: rgba(217, 119, 6, 0.1) !important;
+  }
+
+  /* ─── 3. FOOTER ────────────────────────────────────────────────────────── */
+  .myfooter,
+  footer {
+    background-color: var(--theme-footer-bg) !important;
+    border-top: 1px solid rgba(217, 119, 6, 0.3) !important;
+    color: #334155 !important;
+  }
+
+  .footer-brand-title {
+    color: #b45309 !important;
+  }
+
+  .footer-brand-sub,
+  .footer-link,
+  .contact-val,
+  .copyright-text {
+    color: #0f172a !important;
+  }
+
+  .footer-heading {
+    color: #b45309 !important;
+  }
+
+  .contact-item {
+    background: #ffffff !important;
+    border-color: rgba(217, 119, 6, 0.25) !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+  }
+
+  .contact-label {
+    color: #64748b !important;
+  }
+
+  .footer-status-badge {
+    background: #ffffff !important;
+    border-color: rgba(217, 119, 6, 0.3) !important;
+    color: #b45309 !important;
+  }
+
+  /* ─── 4. UNIVERSAL BACKGROUND WILDCARD OVERRIDES ────────────────────────── */
+  /* Target any slate-900, slate-950, slate-850 with and without opacity */
+  [class*="bg-slate-900"]:not([class*="fixed inset-0"]):not([class*="absolute inset-0 z-"]):not([class*="backdrop-blur"]),
+  [class*="bg-slate-950"]:not([class*="fixed inset-0"]):not([class*="absolute inset-0 z-"]):not([class*="backdrop-blur"]),
+  [class*="bg-slate-850"] {
+    background-color: #ffffff !important;
+  }
+
+  [class*="bg-slate-800"]:not(button.bg-amber-500 *):not(button.bg-emerald-500 *) {
+    background-color: #f0f9ff !important;
+  }
+
+  /* Arbitrary dark hex colors */
+  [class*="bg-[#0f172a]"],
+  [class*="bg-[#070b19]"],
+  [class*="bg-[#070b15]"],
+  [class*="bg-[#070c1e]"],
+  [class*="bg-[#0a101d]"],
+  [class*="bg-[#0b132e]"],
+  [class*="bg-[#091129]"],
+  [class*="bg-[#09112b]"],
+  [class*="bg-[#0a122e]"],
+  [class*="bg-[#0c1538]"],
+  [class*="bg-[#0c163a]"],
+  [class*="bg-[#070d24]"],
+  [class*="bg-[#060913]"],
+  [class*="bg-[#081022]"],
+  [class*="bg-[#08102a]"],
+  [class*="bg-[#060b1c]"],
+  [class*="bg-[#0b1435]"],
+  [class*="bg-[#0b1638]"],
+  [class*="bg-[#111e4a]"],
+  [class*="bg-[#17274b]"],
+  [class*="bg-[#101c3a]"],
+  [class*="bg-[#0b1428]"],
+  [class*="bg-[#0B2027]"],
+  [class*="bg-[#123138]"],
+  [class*="bg-[#061418]"],
+  [class*="bg-[#07171C]"],
+  [class*="bg-[#030712]"],
+  [class*="bg-[#060a17]"],
+  [class*="bg-[#0a0f1d]"],
+  [class*="bg-[#0d1527]"],
+  [class*="bg-[#0a1128]"],
+  [class*="bg-[#0d1b2a]"],
+  [class*="bg-[#050b14]"],
+  [class*="bg-[#040812]"],
+  [class*="bg-[#070e1b]"],
+  [class*="bg-[#0d1e27]"],
+  [class*="bg-[#09151e]"] {
+    background-color: #ffffff !important;
+  }
+
+  /* Specific base wrappers & main backgrounds */
+  [class*="bg-[#050918]"],
+  [class*="bg-[#050811]"],
+  .peta-map-page,
+  .history-dashboard,
+  .history-body,
+  .aboutBody {
+    background-color: #f8fafc !important;
+  }
+
+  /* Modal & Drawer fixed backdrops preserve readability */
+  .fixed.inset-0[class*="bg-slate-950"],
+  .fixed.inset-0[class*="bg-black"],
+  .history-modal-backdrop {
+    background-color: rgba(15, 23, 42, 0.5) !important;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+
+  /* ─── 5. GRADIENT CONTAINERS ───────────────────────────────────────────── */
+  [class*="from-[#0c163a]"],
+  [class*="from-[#0b1435]"],
+  [class*="from-[#0c1538]"],
+  [class*="from-[#0b1638]"],
+  [class*="from-[#17274b]"],
+  [class*="from-[#0B2027]"],
+  [class*="from-[#123138]"],
+  [class*="from-[#0d1e27]"],
+  [class*="from-[#09151e]"],
+  [class*="from-slate-950"],
+  [class*="from-slate-900"] {
+    --tw-gradient-from: #ffffff var(--tw-gradient-from-position) !important;
+  }
+
+  [class*="via-[#111e4a]"],
+  [class*="via-[#101c3a]"],
+  [class*="via-[#0b2027]"],
+  [class*="via-[#0B2027]"],
+  [class*="via-slate-900"] {
+    --tw-gradient-stops: var(--tw-gradient-from), #e0f2fe var(--tw-gradient-via-position, 50%), var(--tw-gradient-to) !important;
+  }
+
+  [class*="to-[#08102a]"],
+  [class*="to-[#070c1e]"],
+  [class*="to-[#070d24]"],
+  [class*="to-[#060913]"],
+  [class*="to-[#0b1428]"],
+  [class*="to-[#0B2027]"],
+  [class*="to-[#123138]"],
+  [class*="to-[#09151e]"],
+  [class*="to-[#0d1e27]"],
+  [class*="to-slate-950"],
+  [class*="to-slate-900"] {
+    --tw-gradient-to: #f0f9ff var(--tw-gradient-to-position) !important;
+  }
+
+  /* ─── 6. WARNA TULISAN / HIGH TEXT CONTRAST ────────────────────────────── */
+  h1:not(.portal-button *):not(button *),
+  h2:not(.portal-button *):not(button *),
+  h3:not(.portal-button *):not(button *),
+  h4:not(.portal-button *):not(button *),
+  h5:not(.portal-button *):not(button *),
+  h6:not(.portal-button *):not(button *) {
+    color: #0f172a !important;
+  }
+
+  .text-white:not(button.bg-amber-500 *):not(button.bg-amber-400 *):not(button.bg-emerald-500 *):not(.portal-button *):not(.btn *):not(.badge *):not([class*="bg-amber-"]):not([class*="bg-emerald-"]) {
+    color: #0f172a !important;
+  }
+
+  [class*="text-slate-100"] {
+    color: #0f172a !important;
+  }
+
+  [class*="text-slate-200"],
+  [class*="text-[#F5EFE0]"],
+  [class*="text-[#EDE6D6]"] {
+    color: #1e293b !important;
+  }
+
+  [class*="text-slate-300"],
+  [class*="text-[#B8C4C2]"] {
+    color: #334155 !important;
+  }
+
+  [class*="text-slate-400"],
+  [class*="text-[#8AA0A4]"] {
+    color: #475569 !important;
+  }
+
+  [class*="text-slate-500"] {
+    color: #64748b !important;
+  }
+
+  /* Tulisan Emas / Amber menjadi Warm Bronze Amber agar terbaca tajam */
+  .text-amber-100:not(button *),
+  .text-amber-200:not(button *),
+  .text-amber-300:not(button *),
+  .text-amber-400:not(button *) {
+    color: #b45309 !important;
+  }
+
+  /* Tulisan Biru Sky menjadi Biru Tua agar terbaca tajam */
+  .text-sky-300:not(button *),
+  .text-sky-400:not(button *) {
+    color: #0284c7 !important;
+  }
+
+  /* Tulisan Hijau Emerald menjadi Hijau Gelap */
+  .text-emerald-300:not(button *),
+  .text-emerald-400:not(button *) {
+    color: #15803d !important;
+  }
+
+  /* Cyan / Teal */
+  .text-cyan-300:not(button *),
+  .text-cyan-400:not(button *),
+  .text-teal-300:not(button *),
+  .text-teal-400:not(button *) {
+    color: #0f766e !important;
+  }
+
+  /* Pengecualian penting: Tombol dengan latar warna emas/hijau tetap memiliki tulisan gelap */
+  button.bg-amber-500,
+  button.bg-amber-400,
+  .portal-button,
+  .portal-button span,
+  .theme-toggle-btn {
+    color: #070c1e !important;
+  }
+
+  /* ─── 7. BORDERS & GARIS PEMBATAS ──────────────────────────────────────── */
+  [class*="border-slate-800"],
+  [class*="border-slate-700"],
+  [class*="border-slate-900"],
+  [class*="border-white/"] {
+    border-color: #cbd5e1 !important;
+  }
+
+  [class*="border-amber-500/"] {
+    border-color: rgba(217, 119, 6, 0.35) !important;
+  }
+
+  /* ─── 8. CARDS & PANELS ────────────────────────────────────────────────── */
+  .glass-card,
+  .card,
+  .chart-card,
+  .stat-card,
+  .feature-card,
+  .showcase-card,
+  .partner-card,
+  [class*="rounded-2xl"][class*="border"][class*="bg-"] {
+    background-color: #ffffff !important;
+    border-color: rgba(217, 119, 6, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06) !important;
+  }
+
+  /* ─── 9. TABLES & DATA LISTS ───────────────────────────────────────────── */
+  table {
+    color: #0f172a !important;
+  }
+
+  thead,
+  thead tr {
+    background-color: #f0f9ff !important;
+    color: #0f172a !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+  }
+
+  th {
+    color: #0f172a !important;
+  }
+
+  td {
+    color: #1e293b !important;
+    border-color: #e2e8f0 !important;
+  }
+
+  tbody tr:hover {
+    background-color: #f8fafc !important;
+  }
+
+  /* ─── 10. FORM INPUT, SELECT & TEXTAREA ─────────────────────────────────── */
+  label {
+    color: #334155 !important;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select,
+  .field {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  select option {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #94a3b8 !important;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus,
+  .field:focus {
+    border-color: #d97706 !important;
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15) !important;
+  }
+
+  /* ─── 11. MODALS & DIALOGS ─────────────────────────────────────────────── */
+  .modal-content,
+  [role="dialog"]>div,
+  .history-modal {
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    border-color: rgba(217, 119, 6, 0.3) !important;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+  }
+
+  /* ─── 12. LEAFLET MAPS & POPUPS ────────────────────────────────────────── */
+  .leaflet-container {
+    background-color: #f0f9ff !important;
+  }
+
+  .leaflet-popup-content-wrapper {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1.5px solid rgba(217, 119, 6, 0.4) !important;
+    border-radius: 14px !important;
+    box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.18) !important;
+    padding: 4px !important;
+  }
+
+  .leaflet-popup-tip {
+    background: #ffffff !important;
+    border: 1.5px solid rgba(217, 119, 6, 0.4) !important;
+  }
+
+  .leaflet-popup-content {
+    color: #0f172a !important;
+  }
+
+  .leaflet-popup-content p,
+  .leaflet-popup-content span {
+    color: #334155 !important;
+  }
+
+  .leaflet-popup-close-button {
+    color: #64748b !important;
+  }
+
+  .leaflet-popup-close-button:hover {
+    color: #d97706 !important;
+  }
+
+  /* ─── 13. SCROLLBARS ───────────────────────────────────────────────────── */
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.06) !important;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(217, 119, 6, 0.35) !important;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(217, 119, 6, 0.65) !important;
+  }
+}
+
+/* ─── THEME TOGGLE BUTTON COMPONENT ────────────────────────────────────── */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px 5px 6px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--theme-gold-border);
+  background: var(--theme-toggle-bg);
+  color: var(--theme-text-primary);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  user-select: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--theme-gold);
+  box-shadow: 0 0 16px var(--theme-gold-muted);
+  transform: translateY(-1px);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.96);
+}
+
+.theme-toggle-knob {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--theme-gold-light), var(--theme-gold));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+html[data-theme="light"] .theme-toggle-knob,
+html.theme-light .theme-toggle-knob,
+html.light .theme-toggle-knob {
+  transform: rotate(360deg);
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
