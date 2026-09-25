@@ -30,5 +30,4 @@ jobs:
       - name: Run Pytest Coverage
         run: |
           cd backend
-          pytest -v
           pytest -v 
