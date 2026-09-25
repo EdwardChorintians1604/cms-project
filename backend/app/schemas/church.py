@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from typing import Optional, List
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class ChurchBase(BaseModel):
     church_code: str
@@ -57,8 +57,7 @@ class ChurchAdminSimple(BaseModel):
     phone: Optional[str] = None
     status: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class JemaatUserSimple(BaseModel):
     id: int
@@ -67,8 +66,7 @@ class JemaatUserSimple(BaseModel):
     email: str
     phone: Optional[str] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ChurchResponse(ChurchBase):
     id: int
@@ -77,5 +75,4 @@ class ChurchResponse(ChurchBase):
     admins: Optional[List[ChurchAdminSimple]] = []
     jemaat_members: Optional[List[JemaatUserSimple]] = []
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
