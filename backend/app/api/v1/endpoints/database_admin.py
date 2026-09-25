@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 import time
-from typing import Any, Optional
+from typing import Any, Dict, Optional
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query
