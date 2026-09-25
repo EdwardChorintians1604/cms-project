@@ -25,9 +25,8 @@ jobs:
           cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov
 
-      - name: Run Pytest Coverage
+      - name: Run Pytest
         env:
           DATABASE_URL: sqlite:///./test.db
         run: |
