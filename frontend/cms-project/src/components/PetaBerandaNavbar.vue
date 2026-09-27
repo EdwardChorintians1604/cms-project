@@ -156,33 +156,33 @@ const scrollToSection = (hash) => {
         </div>
 
         <!-- Center: Desktop Navigation Links (md: icon-only, lg: full text) -->
-        <nav class="hidden md:flex items-center gap-2 lg:gap-4 xl:gap-6 whitespace-nowrap">
+        <nav class="hidden md:flex items-center gap-1 lg:gap-2 xl:gap-3 whitespace-nowrap">
           <RouterLink 
             to="/" 
-            class="classic-link font-sans text-xs uppercase font-medium tracking-wider text-slate-200 hover:text-amber-300 py-1 transition-colors duration-200 flex items-center gap-1.5"
+            class="nav-pill font-sans text-xs uppercase font-semibold tracking-widest flex items-center gap-1.5"
             title="Beranda"
           >
-            <i class="bi bi-house-door text-amber-400 text-xs"></i>
+            <i class="bi bi-house-door nav-pill-icon"></i>
             <span class="hidden lg:inline">Beranda</span>
           </RouterLink>
 
           <a 
             href="#peta-gereja"
             @click.prevent="scrollToSection('#peta-gereja')"
-            class="classic-link font-sans text-xs uppercase font-medium tracking-wider text-slate-200 hover:text-amber-300 py-1 transition-colors duration-200 cursor-pointer bg-transparent border-none flex items-center gap-1.5"
+            class="nav-pill font-sans text-xs uppercase font-semibold tracking-widest flex items-center gap-1.5 cursor-pointer bg-transparent border-none"
             title="Peta Interaktif Gereja"
           >
-            <i class="bi bi-map text-amber-400 text-xs"></i>
+            <i class="bi bi-map nav-pill-icon"></i>
             <span class="hidden lg:inline">Peta Interaktif</span>
           </a>
 
           <a 
             href="#daftar-rute"
             @click.prevent="scrollToSection('#daftar-rute')"
-            class="classic-link font-sans text-xs uppercase font-medium tracking-wider text-slate-200 hover:text-amber-300 py-1 transition-colors duration-200 cursor-pointer bg-transparent border-none flex items-center gap-1.5"
+            class="nav-pill font-sans text-xs uppercase font-semibold tracking-widest flex items-center gap-1.5 cursor-pointer bg-transparent border-none"
             title="Daftar Rute & Lokasi Gereja"
           >
-            <i class="bi bi-buildings text-slate-400 text-xs"></i>
+            <i class="bi bi-buildings nav-pill-icon"></i>
             <span class="hidden lg:inline">Daftar Gereja</span>
           </a>
 
@@ -572,6 +572,125 @@ a {
 .classic-link:hover::after,
 .classic-link.active-link::after {
   width: 100%;
+}
+
+/* =========================================================
+   NAV PILL — elegant glassmorphism nav items
+   ========================================================= */
+.nav-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  color: goldenrod; /* slate-100 — fully visible on dark bg */
+  text-decoration: none !important;
+  letter-spacing: 0.09em;
+  border: 1px solid transparent;
+  background: transparent;
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+  overflow: hidden;
+}
+
+/* Shimmer pseudo-layer */
+.nav-pill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: linear-gradient(120deg,
+    rgba(251, 191, 36, 0.0) 0%,
+    rgba(251, 191, 36, 0.15) 50%,
+    rgba(251, 191, 36, 0.0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Gradient underline bar */
+.nav-pill::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #f59e0b, #fde68a, #f59e0b);
+  border-radius: 9999px;
+  transform: translateX(-50%);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-pill:hover,
+.nav-pill.router-link-active,
+.nav-pill.active-link {
+  color: #fde68a; /* amber-200 — bright & clear */
+  background: rgba(251, 191, 36, 0.13);
+  border-color: rgba(251, 191, 36, 0.35);
+  box-shadow:
+    0 0 16px rgba(251, 191, 36, 0.15),
+    inset 0 0 10px rgba(251, 191, 36, 0.07);
+}
+
+.nav-pill:hover::before,
+.nav-pill.router-link-active::before,
+.nav-pill.active-link::before {
+  opacity: 1;
+}
+
+.nav-pill:hover::after,
+.nav-pill.router-link-active::after,
+.nav-pill.active-link::after {
+  width: 65%;
+}
+
+.nav-pill-icon {
+  font-size: 0.9rem;
+  color: #fbbf24; /* amber-400 — solid, not faded */
+  transition: transform 0.25s ease, filter 0.25s ease;
+  filter: drop-shadow(0 0 3px rgba(251, 191, 36, 0.4));
+}
+
+.nav-pill:hover .nav-pill-icon,
+.nav-pill.router-link-active .nav-pill-icon {
+  transform: scale(1.2) translateY(-0.5px);
+  filter: drop-shadow(0 0 7px rgba(251, 191, 36, 0.9));
+}
+
+/* Light-theme overrides — dark text for contrast on light background */
+:global(html[data-theme="light"]) .classic-navbar .nav-pill {
+  color: #1e293b !important; /* slate-800 — very dark, high contrast */
+}
+:global(html[data-theme="light"]) .classic-navbar .nav-pill:hover,
+:global(html[data-theme="light"]) .classic-navbar .nav-pill.router-link-active {
+  color: #92400e !important; /* amber-900 — rich amber on light */
+  background: rgba(180, 83, 9, 0.1) !important;
+  border-color: rgba(180, 83, 9, 0.35) !important;
+  box-shadow:
+    0 0 14px rgba(180, 83, 9, 0.12),
+    inset 0 0 8px rgba(180, 83, 9, 0.05) !important;
+}
+:global(html[data-theme="light"]) .classic-navbar .nav-pill-icon {
+  color: #b45309 !important; /* amber-700 — visible on white */
+  filter: drop-shadow(0 0 3px rgba(180, 83, 9, 0.3)) !important;
+}
+:global(html[data-theme="light"]) .classic-navbar .nav-pill:hover .nav-pill-icon,
+:global(html[data-theme="light"]) .classic-navbar .nav-pill.router-link-active .nav-pill-icon {
+  filter: drop-shadow(0 0 6px rgba(180, 83, 9, 0.7)) !important;
+}
+:global(html[data-theme="light"]) .classic-navbar .nav-pill::after {
+  background: linear-gradient(90deg, #92400e, #b45309, #92400e) !important;
+}
+:global(html[data-theme="light"]) .classic-navbar .nav-pill::before {
+  background: linear-gradient(120deg,
+    rgba(180, 83, 9, 0.0) 0%,
+    rgba(180, 83, 9, 0.12) 50%,
+    rgba(180, 83, 9, 0.0) 100%) !important;
 }
 
 :global(html[data-theme="light"]) .classic-navbar .classic-link {
