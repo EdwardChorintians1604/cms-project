@@ -1,5 +1,7 @@
 import { reactive, computed } from 'vue'
 import { authService } from '@/services/authService'
+import { storage } from '@/utils'
+import { STORAGE_KEYS } from '@/constants'
 
 const state = reactive({
   user: authService.getCurrentUser(),

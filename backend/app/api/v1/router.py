@@ -1,5 +1,20 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import auth, main_auth, users, items, churches, church_admins, dashboard, database_admin, agenda, system_settings, informasi_pelayanan, security
+from app.api.v1.endpoints import (
+    auth,
+    main_auth,
+    users,
+    items,
+    churches,
+    church_admins,
+    dashboard,
+    database_admin,
+    agenda,
+    system_settings,
+    informasi_pelayanan,
+    security,
+    church_structure,
+    church_ministry,
+)
 from app.keuangan_gereja.api.keuangan import router as keuangan_router
 
 api_router = APIRouter()
@@ -17,5 +32,5 @@ api_router.include_router(agenda.router, prefix="/agenda", tags=["agenda-kegiata
 api_router.include_router(system_settings.router, prefix="/settings", tags=["system-settings"])
 api_router.include_router(informasi_pelayanan.router, prefix="/informasi-pelayanan", tags=["informasi-pelayanan"])
 api_router.include_router(security.router, prefix="/security", tags=["security-dashboard"])
-
-
+api_router.include_router(church_structure.router, prefix="/church-structure", tags=["church-structure"])
+api_router.include_router(church_ministry.router, prefix="/church-ministries", tags=["church-ministries"])

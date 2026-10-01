@@ -38,6 +38,8 @@ import PastoralCareView from '@/pages/pastoral/PastoralCareView.vue'
 import FinanceView from '@/pages/finance/FinanceView.vue'
 import InventoryView from '@/pages/inventory/InventoryView.vue'
 import ChurchAdminProfileView from '@/pages/church_admin/ChurchAdminProfileView.vue'
+import ChurchStructureView from '@/pages/structure/structure.vue'
+import LembagaPelayananJemaatChurchAdmin from '@/pages/worship/Lembaga_Pelayanan_Jemaat_Church_Admin.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -212,6 +214,20 @@ const router = createRouter({
       name: 'church-profile',
       component: ChurchAdminProfileView,
       meta: { requiresAuth: true, role: 'church_admin', title: 'Profil & Akun Admin Gereja Cabang' },
+    },
+    {
+      path: '/church-structure',
+      alias: ['/struktur-gereja', '/struktur-organisasi', '/structure'],
+      name: 'church-structure',
+      component: ChurchStructureView,
+      meta: { requiresAuth: true, role: 'church_admin', title: 'Struktur Organisasi & Kepemimpinan Gereja' },
+    },
+    {
+      path: '/church-ministries',
+      alias: ['/lembaga-pelayanan', '/lembaga-pelayanan-cabang', '/ministries'],
+      name: 'church-ministries',
+      component: LembagaPelayananJemaatChurchAdmin,
+      meta: { requiresAuth: true, role: 'church_admin', title: 'Lembaga Pelayanan Cabang' },
     },
     {
       path: '/dashboard-user',
