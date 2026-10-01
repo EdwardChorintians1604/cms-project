@@ -774,7 +774,7 @@ onMounted(async () => {
           <button
             @click="zoomOut"
             :disabled="zoomScale <= 0.5"
-            class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+            class="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
             title="Perkecil bagan"
             aria-label="Perkecil bagan">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/></svg>
@@ -783,7 +783,7 @@ onMounted(async () => {
           <button
             @click="zoomIn"
             :disabled="zoomScale >= 1.5"
-            class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+            class="flex h-11 w-11 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-slate-200 transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
             title="Perbesar bagan"
             aria-label="Perbesar bagan">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -798,16 +798,16 @@ onMounted(async () => {
 
         <!-- Canvas Container with Blueprint Dot Grid -->
         <div 
-          class="relative mx-auto h-[min(70vh,640px)] min-h-[360px] max-h-[640px] w-full max-w-6xl overflow-auto rounded-2xl border border-slate-800/80 bg-slate-950/70 p-4 pt-16 shadow-2xl sm:p-8 sm:pt-16"
+          class="relative mx-auto h-[min(68dvh,640px)] min-h-[320px] max-h-[640px] w-full max-w-6xl touch-pan-x touch-pan-y overflow-auto overscroll-contain rounded-2xl border border-slate-800/80 bg-slate-950/70 p-3 pt-16 shadow-2xl sm:min-h-[420px] sm:p-8 sm:pt-16"
           style="background-image: radial-gradient(rgba(245, 158, 11, 0.08) 1.5px, transparent 1.5px); background-size: 28px 28px;">
           
           <!-- Zoom Transform Layer -->
           <div 
-            class="flex flex-col items-center min-w-max pb-16 transition-transform duration-200 origin-top"
+            class="flex min-w-max flex-col items-start pb-16 transition-transform duration-200 origin-top-left sm:items-center sm:origin-top"
             :style="{ transform: `scale(${zoomScale})` }">
             
             <!-- Root Nodes Row -->
-            <div class="flex items-start justify-center gap-16">
+            <div class="flex items-start justify-start gap-8 sm:justify-center sm:gap-16">
               <div 
                 v-for="rootNode in treeData" 
                 :key="rootNode.id"

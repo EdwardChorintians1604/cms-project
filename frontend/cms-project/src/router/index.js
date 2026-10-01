@@ -164,7 +164,7 @@ const router = createRouter({
       alias: ['/jemaat-cabang', '/data-jemaat-cabang'],
       name: 'church-members',
       component: MemberListView,
-      meta: { requiresAuth: true, role: 'church_admin', title: 'Database Jemaat & Rayon Cabang' },
+      meta: { requiresAuth: true, role: 'church_admin', title: 'Database Data Induk Jemaat Cabang' },
     },
     {
       path: '/church-roster',

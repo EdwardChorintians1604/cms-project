@@ -42,7 +42,7 @@ const linkedMinistry = () => {
     
     <!-- CARD PEJABAT STRUKTUR -->
     <div 
-      class="w-72 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 rounded-2xl p-4 transition-all duration-300 relative group z-10 text-left"
+      class="w-[min(18rem,calc(100vw-3rem))] bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 rounded-2xl p-4 transition-all duration-300 relative group z-10 text-left sm:w-72"
       :class="[
         node.hierarchy_level === 1 
           ? 'border-2 border-amber-400 shadow-2xl shadow-amber-500/20 hover:border-amber-300' 
@@ -228,7 +228,7 @@ const linkedMinistry = () => {
       <div 
         v-for="child in node.children" 
         :key="child.id"
-        class="flex flex-col items-center px-4 relative">
+        class="flex flex-col items-center px-2 relative sm:px-4">
         
         <!-- VERTICAL CONNECTOR LINE UP TO HORIZONTAL BAR -->
         <div class="w-0.5 h-4 bg-slate-600 -mt-4 mb-0"></div>

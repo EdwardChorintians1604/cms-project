@@ -13,3 +13,8 @@ from app.keuangan_gereja.models import (
 from app.models.agenda import ChurchAgenda
 from app.models.system_setting import SystemSetting
 from app.models.informasi_pelayanan import InformasiPelayanan
+
+from app.models.church_structure import ChurchStructure
+from app.models.church_ministry import ChurchMinistry
+from app.models.church_member import ChurchMember
+from app.models.church_inventory import ChurchInventory, ChurchInventoryLoan

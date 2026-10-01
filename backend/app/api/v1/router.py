@@ -14,6 +14,8 @@ from app.api.v1.endpoints import (
     security,
     church_structure,
     church_ministry,
+    church_member,
+    church_inventory,
 )
 from app.keuangan_gereja.api.keuangan import router as keuangan_router
 
@@ -34,3 +36,5 @@ api_router.include_router(informasi_pelayanan.router, prefix="/informasi-pelayan
 api_router.include_router(security.router, prefix="/security", tags=["security-dashboard"])
 api_router.include_router(church_structure.router, prefix="/church-structure", tags=["church-structure"])
 api_router.include_router(church_ministry.router, prefix="/church-ministries", tags=["church-ministries"])
+api_router.include_router(church_member.router, prefix="/church-members", tags=["church-members"])
+api_router.include_router(church_inventory.router, prefix="/church-inventories", tags=["church-inventories"])
