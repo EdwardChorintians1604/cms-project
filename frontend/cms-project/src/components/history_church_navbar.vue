@@ -149,13 +149,13 @@ const scrollToSection = (hash) => {
 
         <!-- Center: Desktop Navigation Links (Rapi, Sejajar & Tertata) -->
         <!-- md: show compact icon-only nav, lg: show full text nav -->
-        <nav class="hidden md:flex items-center gap-2 lg:gap-4 xl:gap-6 whitespace-nowrap">
+        <nav class="hidden md:flex items-center gap-1 lg:gap-2 xl:gap-3 whitespace-nowrap">
           <RouterLink 
             to="/" 
-            class="classic-link font-sans text-xs uppercase font-medium tracking-wider text-slate-200 hover:text-amber-300 py-1 transition-colors duration-200 flex items-center gap-1.5"
+            class="nav-pill font-sans text-xs uppercase font-semibold tracking-widest flex items-center gap-1.5"
             title="Beranda"
           >
-            <i class="bi bi-house-door text-amber-400 text-xs"></i>
+            <i class="bi bi-house-door nav-pill-icon"></i>
             <span class="hidden lg:inline">Beranda</span>
           </RouterLink>
 
@@ -163,12 +163,12 @@ const scrollToSection = (hash) => {
             type="button" 
             @click="triggerSearchFocus"
             :class="[
-              'classic-link font-sans text-xs uppercase font-medium tracking-wider text-slate-200 hover:text-amber-300 py-1 transition-colors duration-200 cursor-pointer bg-transparent border-none flex items-center gap-1.5',
-              currentView === 'grid' ? 'text-amber-400 font-semibold active-link' : ''
+              'nav-pill font-sans text-xs uppercase font-semibold tracking-widest flex items-center gap-1.5 cursor-pointer bg-transparent border-none',
+              currentView === 'grid' ? 'active-link' : ''
             ]"
             title="Fokus ke Kolom Pencarian Gereja"
           >
-            <i class="bi bi-search text-amber-400 text-xs"></i>
+            <i class="bi bi-search nav-pill-icon"></i>
             <span class="hidden lg:inline">Pencarian</span>
           </button>
 
@@ -176,12 +176,12 @@ const scrollToSection = (hash) => {
             type="button" 
             @click="triggerTimelineToggle('timeline')"
             :class="[
-              'classic-link font-sans text-xs uppercase font-medium tracking-wider text-slate-200 hover:text-amber-300 py-1 transition-colors duration-200 cursor-pointer bg-transparent border-none flex items-center gap-1.5',
-              currentView === 'timeline' ? 'text-amber-400 font-semibold active-link' : ''
+              'nav-pill font-sans text-xs uppercase font-semibold tracking-widest flex items-center gap-1.5 cursor-pointer bg-transparent border-none',
+              currentView === 'timeline' ? 'active-link' : ''
             ]"
             title="Buka Garis Waktu Sejarah Gereja"
           >
-            <i class="bi bi-clock-history text-cyan-400 text-xs"></i>
+            <i class="bi bi-clock-history nav-pill-icon"></i>
             <span class="hidden lg:inline">Garis Waktu</span>
           </button>
 
@@ -189,10 +189,10 @@ const scrollToSection = (hash) => {
           <button
             type="button"
             @click="triggerBookmarks"
-            class="classic-link relative font-sans text-xs uppercase font-medium tracking-wider text-slate-200 hover:text-amber-300 py-1 transition-colors duration-200 cursor-pointer bg-transparent border-none flex items-center gap-1.5"
+            class="nav-pill relative font-sans text-xs uppercase font-semibold tracking-widest flex items-center gap-1.5 cursor-pointer bg-transparent border-none"
             title="Daftar Gereja yang Disimpan"
           >
-            <i class="bi bi-bookmark-star-fill text-amber-400 text-xs"></i>
+            <i class="bi bi-bookmark-star-fill nav-pill-icon"></i>
             <span class="hidden lg:inline">Tersimpan</span>
             <span 
               v-if="bookmarkCount > 0"
@@ -619,6 +619,128 @@ a {
 .classic-link:hover::after,
 .classic-link.active-link::after {
   width: 100%;
+}
+
+/* =========================================================
+   NAV PILL — elegant glassmorphism nav items (goldenrod base)
+   ========================================================= */
+.nav-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  color: goldenrod; /* goldenrod — high visibility on dark bg */
+  text-decoration: none !important;
+  letter-spacing: 0.09em;
+  border: 1px solid transparent;
+  background: transparent;
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+  overflow: hidden;
+}
+
+/* Shimmer pseudo-layer */
+.nav-pill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: linear-gradient(120deg,
+    rgba(218, 165, 32, 0.0) 0%,
+    rgba(218, 165, 32, 0.15) 50%,
+    rgba(218, 165, 32, 0.0) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+/* Gradient underline bar */
+.nav-pill::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #b8860b, #daa520, #b8860b);
+  border-radius: 9999px;
+  transform: translateX(-50%);
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-pill:hover,
+.nav-pill.router-link-active,
+.nav-pill.active-link {
+  color: #ffe066; /* bright warm yellow — clearly visible */
+  background: rgba(218, 165, 32, 0.13);
+  border-color: rgba(218, 165, 32, 0.38);
+  box-shadow:
+    0 0 16px rgba(218, 165, 32, 0.18),
+    inset 0 0 10px rgba(218, 165, 32, 0.07);
+}
+
+.nav-pill:hover::before,
+.nav-pill.router-link-active::before,
+.nav-pill.active-link::before {
+  opacity: 1;
+}
+
+.nav-pill:hover::after,
+.nav-pill.router-link-active::after,
+.nav-pill.active-link::after {
+  width: 65%;
+}
+
+.nav-pill-icon {
+  font-size: 0.9rem;
+  color: goldenrod;
+  transition: transform 0.25s ease, filter 0.25s ease;
+  filter: drop-shadow(0 0 3px rgba(218, 165, 32, 0.45));
+}
+
+.nav-pill:hover .nav-pill-icon,
+.nav-pill.router-link-active .nav-pill-icon,
+.nav-pill.active-link .nav-pill-icon {
+  transform: scale(1.2) translateY(-0.5px);
+  filter: drop-shadow(0 0 7px rgba(218, 165, 32, 0.95));
+}
+
+/* Light-theme overrides — dark text for contrast on light background */
+:global(html[data-theme="light"]) .history-navbar .nav-pill {
+  color: #78350f !important; /* amber-900 — dark & readable on light */
+}
+:global(html[data-theme="light"]) .history-navbar .nav-pill:hover,
+:global(html[data-theme="light"]) .history-navbar .nav-pill.router-link-active,
+:global(html[data-theme="light"]) .history-navbar .nav-pill.active-link {
+  color: #451a03 !important; /* amber-950 — deepest amber */
+  background: rgba(120, 53, 15, 0.1) !important;
+  border-color: rgba(120, 53, 15, 0.35) !important;
+  box-shadow:
+    0 0 14px rgba(120, 53, 15, 0.12),
+    inset 0 0 8px rgba(120, 53, 15, 0.05) !important;
+}
+:global(html[data-theme="light"]) .history-navbar .nav-pill-icon {
+  color: #92400e !important;
+  filter: drop-shadow(0 0 3px rgba(120, 53, 15, 0.3)) !important;
+}
+:global(html[data-theme="light"]) .history-navbar .nav-pill:hover .nav-pill-icon,
+:global(html[data-theme="light"]) .history-navbar .nav-pill.router-link-active .nav-pill-icon,
+:global(html[data-theme="light"]) .history-navbar .nav-pill.active-link .nav-pill-icon {
+  filter: drop-shadow(0 0 6px rgba(120, 53, 15, 0.75)) !important;
+}
+:global(html[data-theme="light"]) .history-navbar .nav-pill::after {
+  background: linear-gradient(90deg, #451a03, #78350f, #451a03) !important;
+}
+:global(html[data-theme="light"]) .history-navbar .nav-pill::before {
+  background: linear-gradient(120deg,
+    rgba(120, 53, 15, 0.0) 0%,
+    rgba(120, 53, 15, 0.12) 50%,
+    rgba(120, 53, 15, 0.0) 100%) !important;
 }
 
 :global(html[data-theme="light"]) .history-navbar .classic-link {

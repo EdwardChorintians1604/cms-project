@@ -808,8 +808,8 @@ const getWhatsAppGreetingUrl = (b) => {
     <div class="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 lg:px-8 font-sans relative overflow-hidden">
       
       <!-- Visual Ambient Glow Overlay -->
-      <div class="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
-      <div class="absolute top-1/3 -right-40 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none animate-pulse" style="animation-delay: 1.5s;"></div>
+      <div class="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none animate-pulse will-change-transform"></div>
+      <div class="absolute top-1/3 -right-40 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none animate-pulse will-change-transform" style="animation-delay: 1.5s;"></div>
       <div class="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none"></div>
 
       <div class="max-w-6xl mx-auto space-y-8 relative z-10">
@@ -832,7 +832,7 @@ const getWhatsAppGreetingUrl = (b) => {
         <div 
           v-if="upcomingHolyDay" 
           data-aos="zoom-in"
-          class="bg-gradient-to-r from-amber-950/70 via-slate-900 to-purple-950/70 border border-amber-500/40 rounded-2xl p-5 sm:p-6 backdrop-blur-xl shadow-2xl shadow-amber-950/20 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-amber-400/60 transition-all duration-500"
+          class="bg-gradient-to-r from-amber-950/70 via-slate-900 to-purple-950/70 border border-amber-500/40 border-l-4 border-l-amber-400 rounded-2xl p-5 sm:p-6 backdrop-blur-xl shadow-2xl shadow-amber-950/20 flex flex-col md:flex-row items-center justify-between gap-6 hover:border-amber-400/60 transition-all duration-500"
         >
           <div class="flex items-center space-x-4">
             <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 p-0.5 shadow-lg shadow-amber-500/30 shrink-0">
@@ -840,7 +840,7 @@ const getWhatsAppGreetingUrl = (b) => {
                 <i :class="['bi', upcomingHolyDay.icon || 'bi-calendar-event', 'text-2xl']"></i>
               </div>
             </div>
-            <div>
+            <div class="text-center md:text-left">
               <span class="text-xs font-semibold text-amber-400 uppercase tracking-widest flex items-center gap-1.5 mb-0.5">
                 <i class="bi bi-clock-history"></i> Hari Raya Mendatang
               </span>
@@ -853,11 +853,11 @@ const getWhatsAppGreetingUrl = (b) => {
             </div>
           </div>
 
-          <div class="flex items-center space-x-3 shrink-0">
+          <div class="flex flex-col sm:flex-row items-center gap-3 shrink-0">
             <div class="px-4 py-2 bg-slate-950/90 border border-amber-500/40 rounded-xl text-center shadow-inner">
               <span class="text-[10px] text-slate-400 block font-mono uppercase">HITUNG MUNDUR</span>
               <span class="text-sm font-bold text-amber-300 font-mono flex items-center justify-center gap-1">
-                <i class="bi bi-[#070c1e] bi-hourglass-split"></i> {{ getDaysUntil(upcomingHolyDay.date) }}
+                <i class="bi bi-hourglass-split"></i> {{ getDaysUntil(upcomingHolyDay.date) }}
               </span>
             </div>
             <button 
@@ -871,64 +871,69 @@ const getWhatsAppGreetingUrl = (b) => {
         </div>
 
         <!-- Controls: Tab Switcher & Filters dengan AOS -->
-        <div data-aos="fade-up" class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4 bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800 backdrop-blur-md">
-          
-          <!-- Mode View Switcher (Kalender / Daftar) -->
-          <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800/80 shrink-0" id="kalender">
-            <button 
-              @click="activeTab = 'calendar'"
-              :class="activeTab === 'calendar' ? 'bg-amber-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'"
-              class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <i class="bi bi-calendar3"></i>
-              <span>Kalender</span>
-            </button>
-            <button 
-              @click="activeTab = 'list'"
-              :class="activeTab === 'list' ? 'bg-amber-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'"
-              class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <i class="bi bi-list-ul"></i>
-              <span>Daftar Agenda ({{ filteredAgendaList.length }})</span>
-            </button>
+        <div data-aos="fade-up" class="flex flex-col gap-3 bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800 backdrop-blur-md">
+          <!-- Row 1: Tab Switcher + Event Type Filter -->
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <!-- Mode View Switcher (Kalender / Daftar) -->
+            <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800/80 shrink-0" id="kalender">
+              <button 
+                @click="activeTab = 'calendar'"
+                :class="activeTab === 'calendar' ? 'bg-amber-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'"
+                class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="bi bi-calendar3"></i>
+                <span>Kalender</span>
+              </button>
+              <button 
+                @click="activeTab = 'list'"
+                :class="activeTab === 'list' ? 'bg-amber-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'"
+                class="px-3.5 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="bi bi-list-ul"></i>
+                <span>Daftar Agenda ({{filteredAgendaList.length}})</span>
+              </button>
+            </div>
+
+            <!-- Filter Kategori Event: Semua | Liturgi | Kegiatan Gereja | Ultah Jemaat -->
+            <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800/80 text-xs shrink-0 overflow-x-auto">
+              <button 
+                @click="eventTypeFilter = 'all'"
+                :class="eventTypeFilter === 'all' ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'"
+                class="px-2.5 py-1 rounded-lg transition cursor-pointer whitespace-nowrap"
+              >
+                Semua Agenda
+              </button>
+              <button 
+                @click="eventTypeFilter = 'liturgi'"
+                :class="eventTypeFilter === 'liturgi' ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'"
+                class="px-2.5 py-1 rounded-lg transition cursor-pointer whitespace-nowrap"
+              >
+                Liturgi Gereja
+              </button>
+              <button 
+                @click="eventTypeFilter = 'kegiatan'"
+                :class="eventTypeFilter === 'kegiatan' ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'"
+                class="px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 whitespace-nowrap"
+              >
+                <i class="bi bi-calendar2-check-fill text-[11px]"></i>
+                <span>Kegiatan Gereja ({{churchAgendasForYear.length}})</span>
+              </button>
+              <button 
+                @click="eventTypeFilter = 'birthday'"
+                :class="eventTypeFilter === 'birthday' ? 'bg-pink-600 text-white font-bold shadow' : 'text-slate-400 hover:text-white'"
+                class="px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 whitespace-nowrap"
+              >
+                <span>🎂</span>
+                <span>Ultah Jemaat ({{jemaatBirthdaysForYear.length}})</span>
+              </button>
+            </div>
           </div>
 
-          <!-- Filter Kategori Event: Semua | Liturgi | Kegiatan Gereja | Ultah Jemaat -->
-          <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-800/80 text-xs shrink-0 overflow-x-auto">
-            <button 
-              @click="eventTypeFilter = 'all'"
-              :class="eventTypeFilter === 'all' ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'"
-              class="px-2.5 py-1 rounded-lg transition cursor-pointer whitespace-nowrap"
-            >
-              Semua Agenda
-            </button>
-            <button 
-              @click="eventTypeFilter = 'liturgi'"
-              :class="eventTypeFilter === 'liturgi' ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'"
-              class="px-2.5 py-1 rounded-lg transition cursor-pointer whitespace-nowrap"
-            >
-              Liturgi Gereja
-            </button>
-            <button 
-              @click="eventTypeFilter = 'kegiatan'"
-              :class="eventTypeFilter === 'kegiatan' ? 'bg-amber-500 text-slate-950 font-bold shadow' : 'text-slate-400 hover:text-white'"
-              class="px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 whitespace-nowrap"
-            >
-              <i class="bi bi-calendar2-check-fill text-[11px]"></i>
-              <span>Kegiatan Gereja ({{ churchAgendasForYear.length }})</span>
-            </button>
-            <button 
-              @click="eventTypeFilter = 'birthday'"
-              :class="eventTypeFilter === 'birthday' ? 'bg-pink-600 text-white font-bold shadow' : 'text-slate-400 hover:text-white'"
-              class="px-2.5 py-1 rounded-lg transition cursor-pointer flex items-center gap-1 whitespace-nowrap"
-            >
-              <span>🎂</span>
-              <span>Ultah Jemaat ({{ jemaatBirthdaysForYear.length }})</span>
-            </button>
-          </div>
+          <!-- Divider -->
+          <div class="border-t border-slate-800"></div>
 
-          <!-- Filter Cabang Gereja & Pemilih Tahun -->
-          <div class="flex flex-wrap items-center gap-2.5 justify-end">
+          <!-- Row 2: Branch Filter + Today + Year Stepper -->
+          <div class="flex flex-wrap items-center justify-between gap-2">
             <!-- Filter Cabang Gereja -->
             <div class="relative">
               <select 
@@ -937,7 +942,7 @@ const getWhatsAppGreetingUrl = (b) => {
               >
                 <option value="all">Semua Cabang Gereja</option>
                 <option v-for="branch in availableBranches" :key="branch" :value="branch">
-                  {{ branch }}
+                  {{branch}}
                 </option>
               </select>
               <i class="bi bi-geo-alt-fill absolute right-2.5 top-1/2 -translate-y-1/2 text-amber-400 text-[10px] pointer-events-none"></i>
@@ -968,7 +973,7 @@ const getWhatsAppGreetingUrl = (b) => {
                     class="px-2.5 py-1 pr-6 bg-transparent text-amber-300 font-bold text-xs focus:outline-none cursor-pointer appearance-none"
                   >
                     <option v-for="y in availableYears" :key="y" :value="y" class="bg-slate-900 text-amber-300">
-                      Tahun {{ y }}
+                      Tahun {{y}}
                     </option>
                   </select>
                   <i class="bi bi-chevron-down absolute right-1.5 top-1/2 -translate-y-1/2 text-slate-400 text-[9px] pointer-events-none"></i>
@@ -1038,13 +1043,13 @@ const getWhatsAppGreetingUrl = (b) => {
             </div>
 
             <!-- Date Cells Grid -->
-            <div class="grid grid-cols-7 gap-1.5 sm:gap-2">
+            <div class="grid grid-cols-7 gap-2">
               <div 
                 v-for="(cell, index) in calendarDays" 
                 :key="index"
                 @click="handleSelectDate(cell)"
                 :class="[
-                  'min-h-[70px] sm:min-h-[82px] p-1.5 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between relative group hover:-translate-y-0.5',
+                  'min-h-[80px] sm:min-h-[96px] p-1.5 rounded-xl border transition-all duration-300 cursor-pointer flex flex-col justify-between relative group hover:-translate-y-0.5',
                   cell.isCurrentMonth ? 'bg-slate-950/70 border-slate-800/80 hover:border-amber-500/60 shadow-sm' : 'bg-slate-950/20 border-transparent opacity-30',
                   cell.isToday ? 'ring-2 ring-amber-400 ring-offset-2 ring-offset-slate-950' : '',
                   cell.holyDay || (cell.birthdays && cell.birthdays.length > 0) || (cell.agendas && cell.agendas.length > 0) ? 'bg-gradient-to-b from-slate-900 to-slate-950 border-amber-500/40 shadow-lg shadow-amber-950/20' : ''
@@ -1076,7 +1081,7 @@ const getWhatsAppGreetingUrl = (b) => {
                   <!-- Holy Day Snippet -->
                   <span 
                     v-if="cell.holyDay"
-                    class="text-[9px] sm:text-[10px] font-semibold leading-tight line-clamp-1 px-1 py-0.5 rounded border block font-sans"
+                    class="text-[10px] sm:text-[11px] font-semibold leading-tight line-clamp-1 px-1 py-0.5 rounded border block font-sans"
                     :class="cell.holyDay.badgeClass"
                   >
                     <i :class="['bi', cell.holyDay.icon || 'bi-bookmark-star', 'me-0.5']"></i>
@@ -1086,7 +1091,7 @@ const getWhatsAppGreetingUrl = (b) => {
                   <!-- Church Agenda Snippet -->
                   <span 
                     v-if="cell.agendas && cell.agendas.length > 0 && !cell.holyDay"
-                    class="text-[9px] sm:text-[10px] font-semibold leading-tight line-clamp-1 px-1 py-0.5 rounded border block font-sans bg-amber-500/20 text-amber-200 border-amber-500/40 hover:bg-amber-500/30 transition"
+                    class="text-[10px] sm:text-[11px] font-semibold leading-tight line-clamp-1 px-1 py-0.5 rounded border block font-sans bg-amber-500/20 text-amber-200 border-amber-500/40 hover:bg-amber-500/30 transition"
                   >
                     <i class="bi bi-calendar-event me-0.5 text-[8px]"></i>
                     {{ cell.agendas[0].title }}
@@ -1095,7 +1100,7 @@ const getWhatsAppGreetingUrl = (b) => {
                   <!-- Birthday Snippet -->
                   <span 
                     v-if="cell.birthdays && cell.birthdays.length > 0 && !cell.holyDay && (!cell.agendas || cell.agendas.length === 0)"
-                    class="text-[9px] sm:text-[10px] font-semibold leading-tight line-clamp-1 px-1 py-0.5 rounded border block font-sans bg-pink-950/80 text-pink-300 border-pink-500/40 hover:bg-pink-900/90 transition"
+                    class="text-[10px] sm:text-[11px] font-semibold leading-tight line-clamp-1 px-1 py-0.5 rounded border block font-sans bg-pink-950/80 text-pink-300 border-pink-500/40 hover:bg-pink-900/90 transition"
                   >
                     🎂 {{ cell.birthdays.length === 1 ? `${cell.birthdays[0].name.split(' ')[0]} (ke-${cell.birthdays[0].age})` : `${cell.birthdays.length} Jemaat Ultah` }}
                   </span>
@@ -1104,7 +1109,7 @@ const getWhatsAppGreetingUrl = (b) => {
             </div>
 
             <!-- Legend Warna Liturgi & Ulang Tahun -->
-            <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+            <div class="pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-400">
               <span class="font-bold text-slate-300 flex items-center gap-1">
                 <i class="bi bi-palette text-amber-400"></i> Keterangan Agenda:
               </span>
@@ -1117,7 +1122,7 @@ const getWhatsAppGreetingUrl = (b) => {
           </div>
 
           <!-- Detail Card Sidebar (1 Col) dengan AOS -->
-          <div data-aos="fade-left" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md flex flex-col justify-between space-y-6">
+          <div data-aos="fade-left" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 shadow-2xl backdrop-blur-md flex flex-col gap-4 overflow-y-auto max-h-[640px]">
             
             <!-- Kasus 1: Tanggal yang dipilih memiliki Hari Raya Liturgi ATAU Ulang Tahun Jemaat ATAU Agenda Gereja -->
             <div v-if="selectedHolyDay || (selectedBirthdays && selectedBirthdays.length > 0) || (selectedChurchAgendas && selectedChurchAgendas.length > 0)" class="space-y-5 animate__animated animate__fadeIn">
@@ -1191,7 +1196,7 @@ const getWhatsAppGreetingUrl = (b) => {
                   >
                     <div class="flex items-center justify-between gap-2">
                       <div class="flex items-center gap-2.5">
-                        <div class="w-9 h-9 rounded-full bg-pink-500/20 border border-pink-400/40 text-pink-300 font-bold flex items-center justify-center text-sm font-serif">
+                        <div class="w-10 h-10 rounded-full bg-pink-500/20 border border-pink-400/40 text-pink-300 font-bold flex items-center justify-center text-sm font-serif">
                           {{ bday.name ? bday.name.charAt(0) : 'J' }}
                         </div>
                         <div>
@@ -1278,7 +1283,7 @@ const getWhatsAppGreetingUrl = (b) => {
             </div>
 
             <!-- Empty State jika belum pilih tanggal atau tanggal kosong -->
-            <div v-else class="h-full flex flex-col items-center justify-center text-center p-6 space-y-3 text-slate-500">
+            <div v-else class="flex flex-col items-center justify-center text-center p-6 space-y-3 text-slate-500 min-h-[260px]">
               <div class="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-amber-400/70 shadow-inner">
                 <i class="bi bi-calendar-heart text-2xl"></i>
               </div>
@@ -1288,7 +1293,7 @@ const getWhatsAppGreetingUrl = (b) => {
             </div>
 
             <!-- Quick Tip Footer -->
-            <div class="pt-4 border-t border-slate-800 text-[11px] text-slate-400 text-center flex items-center justify-center gap-1">
+            <div class="mt-auto pt-4 border-t border-slate-800 text-[11px] text-slate-400 text-center flex items-center justify-center gap-1">
               <i class="bi bi-check-circle-fill text-emerald-400"></i>
               <span>Tanggal lahir jemaat tersinkronisasi otomatis dari basis data gereja.</span>
             </div>
@@ -1362,14 +1367,14 @@ const getWhatsAppGreetingUrl = (b) => {
                       <i class="bi bi-calendar-event"></i> {{ item.date }}
                     </span>
                     <h3 
-                      class="text-lg font-bold font-serif mt-0.5 transition"
+                      class="text-base sm:text-lg font-bold font-serif mt-0.5 transition"
                       :class="item.category === 'birthday' ? 'text-pink-100 group-hover:text-pink-300' : 'text-white group-hover:text-amber-300'"
                     >
                       {{ item.title }}
                     </h3>
                   </div>
                 </div>
-                <span class="px-2.5 py-1 text-[11px] font-semibold rounded-lg border shrink-0" :class="item.badgeClass">
+                <span class="px-2.5 py-1 text-[11px] font-semibold rounded-lg border shrink-0 max-w-[120px] truncate" :class="item.badgeClass">
                   {{ item.colorName }}
                 </span>
               </div>
@@ -1409,7 +1414,7 @@ const getWhatsAppGreetingUrl = (b) => {
   background: url(https://media.istockphoto.com/id/1271405992/id/vektor/konsep-ibadah-kekristenan-futuristik-dengan-alkitab-terbuka-poligonal-rendah-bersinar-dan.jpg?s=612x612&w=0&k=20&c=qf1QAy8mlLTSlOg4DrvoCelAOoiApQe2XKUlan6zNj0=);
   min-height: 80vh;
   width: 100%;
-  padding: 4rem 1.5rem;
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 4vw, 1.5rem);
   animation: fadeUp 1s ease-in-out;
   display: flex;
   align-items: center;
@@ -1443,13 +1448,14 @@ const getWhatsAppGreetingUrl = (b) => {
 }
 
 .headerLogo {
-  margin-top: -1rem;
+  margin-top: 0;
   margin-bottom: 1.5rem;
 }
 
 .imgSize {
-  width: 210px;
-  height: 210px;
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
   animation: fadeUp 1s ease-in-out;
   transition: transform 0.3s ease, filter 0.3s ease;
   cursor: pointer;
@@ -1466,7 +1472,7 @@ const getWhatsAppGreetingUrl = (b) => {
   font-weight: 700;
   letter-spacing: 0.03em;
   text-align: center;
-  margin-top: -1.5rem;
+  margin-top: 0.75rem;
   margin-bottom: 1rem;
   color: #fbbf24;
   text-shadow: 0 4px 18px rgba(245, 158, 11, 0.35);
@@ -1578,6 +1584,11 @@ const getWhatsAppGreetingUrl = (b) => {
     color: #1e293b;
     text-shadow: 0 1px 4px rgba(255, 255, 255, 0.8);
   }
+}
+
+/* Smooth scroll */
+:global(html) {
+  scroll-behavior: smooth;
 }
 </style>
 
