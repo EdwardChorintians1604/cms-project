@@ -37,6 +37,7 @@ import SacramentView from '@/pages/sacrament/SacramentView.vue'
 import PastoralCareView from '@/pages/pastoral/PastoralCareView.vue'
 import FinanceView from '@/pages/finance/FinanceView.vue'
 import InventoryView from '@/pages/inventory/InventoryView.vue'
+import ChurchAdminProfileView from '@/pages/church_admin/ChurchAdminProfileView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -204,6 +205,13 @@ const router = createRouter({
       name: 'church-facilities',
       component: InventoryView,
       meta: { requiresAuth: true, role: 'church_admin', title: 'Aset & Peminjaman Fasilitas Cabang' },
+    },
+    {
+      path: '/church-profile',
+      alias: ['/profil-admin-cabang', '/profil-gereja-cabang', '/profil-admin-gereja'],
+      name: 'church-profile',
+      component: ChurchAdminProfileView,
+      meta: { requiresAuth: true, role: 'church_admin', title: 'Profil & Akun Admin Gereja Cabang' },
     },
     {
       path: '/dashboard-user',

@@ -60,22 +60,10 @@ def unified_login(
         }
 
     # 2. Cek apakah ini Admin Gereja Cabang (church_admins)
-    church_admin = ChurchAdminService.get_by_login_identifier(db, identifier=username)
-    if church_admin and security.verify_password(password, church_admin.password):
-        if church_admin.status != "Aktif":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Akun Admin Gereja belum aktif atau telah dinonaktifkan.",
-            )
-        if church_code and church_code.strip():
-            code_upper = church_code.strip().upper()
-            matches_branch = bool(church_admin.church_code and church_admin.church_code.upper() == code_upper)
-            matches_parent = bool(church_admin.church and church_admin.church.church_code and church_admin.church.church_code.upper() == code_upper)
-            if not (matches_branch or matches_parent):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"Kode gereja tidak sesuai dengan akun ini.",
-                )
+    church_admin = ChurchAdminService.authenticate(
+        db, identifier=username, password=password, church_code=church_code
+    )
+    if church_admin:
         token = security.create_access_token(
             f"church_admin:{church_admin.id}", expires_delta=access_token_expires
         )

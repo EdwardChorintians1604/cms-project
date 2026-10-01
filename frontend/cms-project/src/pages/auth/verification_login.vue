@@ -2,9 +2,11 @@
 import { ref, reactive } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { authService } from '@/services/authService'
+import { useAuthStore } from '@/stores/authStore'
 import ThemeToggleButton from '@/components/ThemeToggleButton.vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 // Form Data
 const form = reactive({
@@ -72,6 +74,9 @@ const handleUnifiedVerificationLogin = async () => {
     verificationPhase.value = 'Memverifikasi hak akses & role sistem...'
 
     const result = await authService.unifiedLogin(credentials)
+    if (result && result.user) {
+      authStore.setUser(result.user)
+    }
 
     verificationPhase.value = 'Otorisasi Berhasil! Mengalihkan ke dashboard...'
     const detectedRole = result.role || 'jemaat'

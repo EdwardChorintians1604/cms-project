@@ -296,8 +296,13 @@ const loadChurchData = async () => {
 
       // Tentukan admin mana yang sedang aktif
       let currentAdmin = null
-      if (user.value && user.value.role === 'church_admin') {
-        currentAdmin = list.find(a => a.id === user.value.id || a.email === user.value.email)
+      if (user.value) {
+        currentAdmin = list.find(a => 
+          (user.value.id && Number(a.id) === Number(user.value.id)) ||
+          (user.value.email && a.email && a.email.toLowerCase() === user.value.email.toLowerCase()) ||
+          (user.value.church_code && a.church_code && a.church_code.toUpperCase() === user.value.church_code.toUpperCase()) ||
+          (user.value.church_id && a.church_id && Number(a.church_id) === Number(user.value.church_id))
+        )
       }
       
       // Fallback ke admin pertama jika tidak ada sesi spesifik

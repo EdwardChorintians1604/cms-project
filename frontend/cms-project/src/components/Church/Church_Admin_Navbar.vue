@@ -101,11 +101,16 @@ const navLinks = [
               class="flex items-center gap-2.5 p-1.5 pl-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-500/40 text-slate-200 hover:text-amber-300 transition duration-200 cursor-pointer shadow-sm"
             >
               <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black text-xs flex items-center justify-center shadow">
-                {{ user?.full_name?.charAt(0) || user?.name?.charAt(0) || 'A' }}
+                {{ user?.admin_name?.charAt(0) || user?.full_name?.charAt(0) || user?.name?.charAt(0) || 'A' }}
               </div>
-              <span class="hidden sm:inline text-xs font-bold tracking-wide truncate max-w-[90px]">
-                {{ user?.full_name || user?.name || 'Admin Gereja' }}
-              </span>
+              <div class="hidden sm:flex flex-col text-left max-w-[130px]">
+                <span class="text-xs font-bold tracking-wide truncate text-white leading-tight">
+                  {{ user?.admin_name || user?.full_name || user?.name || 'Admin Gereja' }}
+                </span>
+                <span class="text-[9px] text-amber-400/90 font-medium truncate leading-tight">
+                  {{ user?.church_name || 'Cabang Gereja' }}
+                </span>
+              </div>
               <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': isUserMenuOpen }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
               </svg>
@@ -122,12 +127,19 @@ const navLinks = [
             <Transition name="dropdown">
               <div
                 v-if="isUserMenuOpen"
-                class="absolute right-0 mt-2 w-60 bg-slate-900/95 border border-amber-500/30 rounded-2xl shadow-2xl p-2 z-50 text-xs backdrop-blur-xl"
+                class="absolute right-0 mt-2 w-64 bg-slate-900/95 border border-amber-500/30 rounded-2xl shadow-2xl p-2 z-50 text-xs backdrop-blur-xl"
               >
                 <div class="px-3 py-2.5 border-b border-slate-800 bg-slate-950/60 rounded-xl mb-1">
-                  <p class="font-extrabold text-white truncate">{{ user?.full_name || user?.name || 'Admin Gereja' }}</p>
-                  <p class="text-[10px] text-amber-400/90 font-mono truncate mt-0.5">{{ user?.email || 'church.admin@gracepoint.org' }}</p>
-                  <p class="text-[9px] text-slate-500 mt-0.5 uppercase tracking-wider">Portal Pengurus Gereja</p>
+                  <p class="font-extrabold text-white truncate">{{ user?.admin_name || user?.full_name || user?.name || 'Admin Gereja' }}</p>
+                  <p class="text-[11px] text-amber-400 font-semibold truncate mt-0.5 flex items-center gap-1">
+                    <span>⛪</span> {{ user?.church_name || 'GracePoint Cabang' }}
+                  </p>
+                  <div class="flex items-center justify-between mt-1 text-[10px] text-slate-400 font-mono">
+                    <span class="truncate">{{ user?.email || 'admin@gracepoint.org' }}</span>
+                    <span v-if="user?.church_code" class="px-1 py-0.2 bg-amber-500/20 text-amber-300 rounded text-[9px] font-bold border border-amber-500/30 shrink-0 ml-1">
+                      {{ user.church_code }}
+                    </span>
+                  </div>
                 </div>
 
                 <router-link
@@ -139,6 +151,17 @@ const navLinks = [
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
                   </svg>
                   <span>Overview Dashboard</span>
+                </router-link>
+
+                <router-link
+                  to="/church-profile"
+                  @click="isUserMenuOpen = false"
+                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:bg-amber-500/15 hover:text-amber-300 transition no-underline font-semibold text-amber-200"
+                >
+                  <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                  </svg>
+                  <span>Profil &amp; Akun Admin</span>
                 </router-link>
 
                 <router-link

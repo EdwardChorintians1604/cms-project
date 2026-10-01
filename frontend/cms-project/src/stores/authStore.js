@@ -48,6 +48,25 @@ export const useAuthStore = () => {
     }
   }
 
+  const setUser = (userData) => {
+    state.user = userData
+    if (userData) {
+      storage.set(STORAGE_KEYS.USER_DATA, userData)
+    }
+  }
+
+  const unifiedLogin = async (credentials) => {
+    state.isLoading = true
+    try {
+      const res = await authService.unifiedLogin(credentials)
+      state.user = res.user
+      state.token = res.token
+      return res
+    } finally {
+      state.isLoading = false
+    }
+  }
+
   const setToken = (token) => {
     state.token = token
   }
@@ -68,6 +87,8 @@ export const useAuthStore = () => {
     user,
     isAuthenticated,
     isLoading,
+    setUser,
+    unifiedLogin,
     login,
     mainLogin,
     churchLogin,

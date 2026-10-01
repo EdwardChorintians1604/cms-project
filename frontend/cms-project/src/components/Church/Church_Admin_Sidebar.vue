@@ -2,8 +2,10 @@
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useSidebar } from '@/composables/useSidebar'
+import { useAuth } from '@/composables/useAuth'
 
 const { isSidebarOpen, toggleSidebar, closeSidebar } = useSidebar()
+const { user } = useAuth()
 
 // Collapsible state for each category (8 Categories)
 const openSections = ref({
@@ -43,6 +45,12 @@ const menuSections = [
   {
     title: 'Mengenai Cabang Gereja',
     items: [
+      {
+        name: 'Profil & Akun Admin Cabang',
+        path: '/church-profile',
+        icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z',
+        badge: 'Akun', badgeColor: 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+      },
       {
         name: 'Struktur Kepempinan Gereja',
         path: '/#',
@@ -192,7 +200,7 @@ const menuSections = [
       },
       {
         name: 'Pengaturan Cabang Gereja',
-        path: '/church-settings',
+        path: '/church-profile',
         icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'
       },
       {
@@ -253,6 +261,46 @@ const menuSections = [
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
           </svg>
         </button>
+      </div>
+
+      <!-- Identitas Akun Admin Cabang Yang Sedang Login -->
+      <div class="p-3 bg-gradient-to-br from-slate-900 via-slate-950 to-amber-950/30 border border-amber-500/30 rounded-xl shadow-lg relative overflow-hidden group">
+        <div class="flex items-start gap-2.5">
+          <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black text-sm flex items-center justify-center shrink-0 shadow-md">
+            {{ user?.admin_name?.charAt(0) || user?.full_name?.charAt(0) || user?.name?.charAt(0) || 'A' }}
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="font-extrabold text-white text-xs truncate leading-snug">
+              {{ user?.admin_name || user?.full_name || user?.name || 'Admin Gereja' }}
+            </p>
+            <p class="text-[10px] text-amber-300 font-semibold truncate leading-tight mt-0.5 flex items-center gap-1">
+              <span>⛪</span> {{ user?.church_name || 'GracePoint Cabang' }}
+            </p>
+            <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+              <span v-if="user?.church_code" class="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded text-[9px] font-mono font-bold border border-amber-500/30">
+                {{ user.church_code }}
+              </span>
+              <span v-if="user?.city" class="text-[9px] text-slate-400 truncate max-w-[80px]">
+                📍 {{ user.city }}
+              </span>
+              <span class="inline-flex items-center gap-1 text-[9px] text-emerald-400 font-semibold">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                Aktif
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <RouterLink
+          to="/church-profile"
+          @click="closeSidebar"
+          class="mt-2.5 w-full py-1.5 px-2 bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/30 hover:border-amber-400 text-amber-300 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 transition no-underline shadow-sm"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+          <span>Kelola Akun Admin &amp; Cabang</span>
+        </RouterLink>
       </div>
 
       <!-- Navigation Accordion Sections -->

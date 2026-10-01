@@ -22,6 +22,8 @@ def read_user_me(
             "church_name": current_user.church_name,
             "city": current_user.city,
             "admin_name": current_user.admin_name,
+            "full_name": current_user.admin_name,
+            "name": current_user.admin_name,
             "email": current_user.email,
             "phone": current_user.phone,
             "address": getattr(current_user, "address", None),
@@ -30,6 +32,7 @@ def read_user_me(
             "google_maps_url": getattr(current_user, "google_maps_url", None),
             "role": "church_admin",
             "status": current_user.status,
+            "created_at": current_user.created_at.isoformat() if getattr(current_user, "created_at", None) else None,
         }
     elif role == "superadmin":
         return {

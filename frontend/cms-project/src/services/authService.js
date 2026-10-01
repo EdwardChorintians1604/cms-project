@@ -64,7 +64,12 @@ export const authService = {
         })
         if (userResponse.ok) {
           const userData = await userResponse.json()
-          const userWithRole = { ...userData, role: detectedRole }
+          const userWithRole = {
+            ...userData,
+            role: detectedRole,
+            full_name: userData.full_name || userData.admin_name || userData.developer_name || userData.name || userData.username || 'Pengguna',
+            name: userData.name || userData.admin_name || userData.developer_name || userData.full_name || userData.username || 'Pengguna'
+          }
           storage.set(STORAGE_KEYS.USER_DATA, userWithRole)
           return { user: userWithRole, token: accessToken, role: detectedRole }
         }
@@ -219,7 +224,12 @@ export const authService = {
     }
 
     const user = await response.json()
-    const userWithRole = { ...user, role: user.role || 'jemaat' }
+    const userWithRole = {
+      ...user,
+      role: user.role || 'jemaat',
+      full_name: user.full_name || user.admin_name || user.developer_name || user.name || user.username || 'Pengguna',
+      name: user.name || user.admin_name || user.developer_name || user.full_name || user.username || 'Pengguna'
+    }
     storage.set(STORAGE_KEYS.USER_DATA, userWithRole)
     return userWithRole
   },
