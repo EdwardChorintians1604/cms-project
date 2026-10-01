@@ -32,3 +32,7 @@ class User(Base):
 
     items = relationship("Item", back_populates="owner", cascade="all, delete-orphan")
     church = relationship("Church", back_populates="jemaat_members")
+
+    @property
+    def role(self):
+        return "jemaat"

@@ -39,6 +39,12 @@ def read_user_me(
             "email": getattr(current_user, "email", "admin@gracepoint.or.id"),
             "role": "superadmin",
         }
+    
+    if isinstance(current_user, User):
+        user_dict = UserResponse.model_validate(current_user).model_dump(mode="json")
+        user_dict["role"] = "jemaat"
+        return user_dict
+
     return current_user
 
 @router.get("/", response_model=List[UserResponse])
