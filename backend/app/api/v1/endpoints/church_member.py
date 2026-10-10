@@ -50,6 +50,16 @@ def get_church_members(
         seed_default_members(church_code=church_code, db=db)
         members = db.query(ChurchMember).filter(ChurchMember.church_code == church_code).order_by(ChurchMember.id.asc()).all()
 
+    for m in members:
+        if m.church:
+            setattr(m, "church_name", m.church.church_name)
+        elif m.church_code:
+            ch = db.query(Church).filter(Church.church_code == m.church_code).first()
+            if ch:
+                setattr(m, "church_name", ch.church_name)
+            else:
+                setattr(m, "church_name", f"GracePoint Cabang {m.church_code}")
+
     return members
 
 @router.get("/{member_id}", response_model=ChurchMemberResponse)
@@ -60,6 +70,14 @@ def get_church_member(
     member = db.query(ChurchMember).filter(ChurchMember.id == member_id).first()
     if not member:
         raise HTTPException(status_code=404, detail="Data jemaat tidak ditemukan")
+    if member.church:
+        setattr(member, "church_name", member.church.church_name)
+    elif member.church_code:
+        ch = db.query(Church).filter(Church.church_code == member.church_code).first()
+        if ch:
+            setattr(member, "church_name", ch.church_name)
+        else:
+            setattr(member, "church_name", f"GracePoint Cabang {member.church_code}")
     return member
 
 @router.post("/", response_model=ChurchMemberResponse, status_code=status.HTTP_201_CREATED)

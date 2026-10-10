@@ -60,10 +60,10 @@ const menuSections = [
         badge: 'Live', badgeColor: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
       },
       {
-        name: 'Statistika Cabang Gereja',
-        path: '/dashboard-church#geolocation',
-        icon: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z',
-        badge: 'GPS', badgeColor: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+        name: 'Akses Layanan Gereja',
+        path: '/dashboard-church#main_service',
+        icon: 'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z M14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6z M4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2z M14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z',
+        badge: 'Modul', badgeColor: 'bg-amber-500/15 text-amber-300 border-amber-500/30'
       }
     ]
   },
@@ -160,15 +160,28 @@ const menuSections = [
     title: 'Keuangan & Persembahan Cabang',
     items: [
       {
-        name: 'Kasir & Input Persembahan Cepat',
-        path: '/church-finance',
+        name: 'Pemasukan Kas Gereja',
+        path: '/church-finance-pemasukan',
         icon: 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z',
-        badge: 'Kasir', badgeColor: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+        badge: 'Masuk', badgeColor: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
       },
       {
-        name: 'Laporan Kas & Rekonsiliasi',
-        path: '/church-finance#laporan',
-        icon: 'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z'
+        name: 'Pengeluaran Kas Gereja',
+        path: '/church-finance-pengeluaran',
+        icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+        badge: 'Keluar', badgeColor: 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+      },
+      {
+        name: 'Kasir Hitung Fisik Ibadah',
+        path: '/church-finance',
+        icon: 'M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z',
+        badge: 'Kasir', badgeColor: 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+      }, 
+      {
+        name: 'Grafik & Laporan Keuangan',
+        path: '/church-finance-graphic',
+        icon: 'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z',
+        badge: 'Grafik', badgeColor: 'bg-sky-500/15 text-sky-300 border-sky-500/30'
       },
     ]
   },

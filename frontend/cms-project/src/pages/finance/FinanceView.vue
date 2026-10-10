@@ -1,7 +1,19 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import ChurchAdminLayout from '@/layouts/ChurchAdminLayout.vue'
 import Card from '@/components/Card.vue'
+import { useAuth } from '@/composables/useAuth'
+import { useTheme } from '@/composables/useTheme'
+import { APP_CONFIG } from '@/config'
+import { STORAGE_KEYS } from '@/constants'
+import { storage } from '@/utils'
+
+const { user } = useAuth()
+const { isDark } = useTheme()
+
+const activeChurchId = computed(() => user.value?.church_id || 1)
+const activeChurchName = computed(() => user.value?.church_name || 'Gereja Cabang GracePoint')
 
 // Denominasi Pecahan Uang Kertas & Logam
 const denominations = ref([
@@ -40,7 +52,58 @@ const recentOfferings = ref([
 ])
 
 const saveSuccess = ref(false)
-const saveOffering = () => {
+
+const saveOffering = async () => {
+  const total = grandTotal.value
+  if (!total || total <= 0) return
+
+  // Catat langsung ke tabel Pemasukan persisten
+  const storageKey = `grace_pemasukan_cabang_${activeChurchId.value}`
+  try {
+    const raw = localStorage.getItem(storageKey)
+    let list = raw ? JSON.parse(raw) : []
+    const newTrx = {
+      id: Date.now(),
+      nomor_transaksi: `IN-CAB-${new Date().getFullYear()}-${String(list.length + 1).padStart(3, '0')}`,
+      tanggal: new Date().toISOString().slice(0, 10),
+      kategori: 'Persembahan Ibadah Raya',
+      nominal: total,
+      jumlah: total,
+      church_id: activeChurchId.value,
+      church_name: activeChurchName.value,
+      metode_pembayaran: qrisAmount.value > 0 ? (cashTotal.value > 0 ? 'Tunai & QRIS' : 'QRIS Digital') : 'Tunai',
+      nama_penyetor: 'Majelis Kasir Ibadah',
+      donor_name: 'Majelis Kasir Ibadah',
+      keterangan: `Hitungan fisik kasir: Tunai ${formatRp(cashTotal.value)} + Non-Tunai ${formatRp(qrisAmount.value)}`,
+      status_verifikasi: 'Verified',
+      created_at: new Date().toISOString()
+    }
+    list.unshift(newTrx)
+    localStorage.setItem(storageKey, JSON.stringify(list))
+
+    // Coba simpan ke Backend API
+    const token = storage.get(STORAGE_KEYS.AUTH_TOKEN)
+    await fetch(`${APP_CONFIG.apiBaseUrl}/keuangan/pemasukan`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify({
+        church_id: activeChurchId.value,
+        tanggal: newTrx.tanggal,
+        kategori: newTrx.kategori,
+        jumlah: total,
+        metode_pembayaran: newTrx.metode_pembayaran,
+        donor_name: newTrx.donor_name,
+        keterangan: newTrx.keterangan,
+        status_verifikasi: 'Verified'
+      })
+    })
+  } catch (e) {
+    console.warn('Simpan transaksi kasir ke backend/storage:', e)
+  }
+
   saveSuccess.value = true
   setTimeout(() => {
     saveSuccess.value = false
@@ -51,18 +114,65 @@ const saveOffering = () => {
 <template>
   <ChurchAdminLayout>
     <div class="space-y-6">
+
+      <!-- NAVIGATION TABS SWITCHER -->
+      <div :class="['p-1.5 rounded-2xl border flex flex-wrap items-center gap-1.5 transition-colors', isDark ? 'bg-slate-900/80 border-slate-800' : 'bg-slate-100 border-slate-300/80']">
+        <RouterLink 
+          to="/church-finance-pemasukan"
+          :class="[
+            'px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-transparent',
+            isDark ? 'text-slate-400 hover:text-emerald-300 hover:bg-slate-800/60' : 'text-slate-600 hover:text-emerald-600 hover:bg-white'
+          ]"
+        >
+          <i class="bi bi-arrow-down-left-circle"></i>
+          <span>Pemasukan Kas &amp; Persembahan</span>
+        </RouterLink>
+
+        <RouterLink 
+          to="/church-finance-pengeluaran"
+          :class="[
+            'px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-transparent',
+            isDark ? 'text-slate-400 hover:text-rose-300 hover:bg-slate-800/60' : 'text-slate-600 hover:text-rose-600 hover:bg-white'
+          ]"
+        >
+          <i class="bi bi-arrow-up-right-circle"></i>
+          <span>Pengeluaran Kas Operasional</span>
+        </RouterLink>
+
+        <RouterLink 
+          to="/church-finance"
+          :class="[
+            'px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 border shadow-sm',
+            'bg-amber-500/20 text-amber-400 border-amber-500/40'
+          ]"
+        >
+          <i class="bi bi-calculator-fill"></i>
+          <span>Kasir Hitung Pecahan Ibadah</span>
+        </RouterLink>
+
+        <RouterLink 
+          to="/church-finance-graphic"
+          :class="[
+            'px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-transparent',
+            isDark ? 'text-slate-400 hover:text-sky-300 hover:bg-slate-800/60' : 'text-slate-600 hover:text-sky-600 hover:bg-white'
+          ]"
+        >
+          <i class="bi bi-graph-up-arrow"></i>
+          <span>Grafik &amp; Analisis Keuangan</span>
+        </RouterLink>
+      </div>
       
       <!-- Top Header Banner -->
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-amber-500/20">
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span class="text-xs uppercase tracking-widest text-emerald-400 font-bold">KEUANGAN & KASIR CABANG</span>
+            <span class="text-xs uppercase tracking-widest text-emerald-400 font-bold">KEUANGAN &amp; KASIR CABANG • {{ activeChurchName }}</span>
           </div>
-          <h1 class="text-2xl sm:text-3xl font-bold font-serif text-white tracking-wide">
-            Kasir Persembahan & Manajemen Kas Ibadah
+          <h1 :class="['text-2xl sm:text-3xl font-bold font-serif tracking-wide', isDark ? 'text-white' : 'text-slate-900']">
+            Kasir Persembahan &amp; Manajemen Kas Ibadah
           </h1>
-          <p class="text-slate-400 text-sm mt-1">
+          <p :class="['text-sm mt-1', isDark ? 'text-slate-400' : 'text-slate-600']">
             Hitung cepat perolehan persembahan kantong mingguan per pecahan lembar rupiah dan rekonsiliasi donasi QRIS digital.
           </p>
         </div>

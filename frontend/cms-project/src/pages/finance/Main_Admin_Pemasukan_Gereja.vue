@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import MainAdminLayout from '@/layouts/MainAdminLayout.vue'
 import { APP_CONFIG } from '@/config'
 import { STORAGE_KEYS } from '@/constants'
 import { storage } from '@/utils'
 import { exportToCSV, exportToPDF, exportToJSON, downloadServerExport } from '@/utils/exportFinanceReport'
+import { fetchAllFinanceRecords } from '@/utils/fetchAllFinanceRecords'
 
 // --- State Data Utama Pemasukan ---
 const pemasukanList = ref([])
@@ -18,11 +19,8 @@ const categoryFilter = ref('Semua')
 const churchFilter = ref('Semua')
 const methodFilter = ref('Semua')
 
-// Modal State
-const isModalOpen = ref(false)
 const isDetailModalOpen = ref(false)
 const selectedItem = ref(null)
-const isSubmitting = ref(false)
 
 // Toast
 const showToast = ref(false)
@@ -38,17 +36,6 @@ const triggerToast = (msg, type = 'success') => {
   }, 4000)
 }
 
-// Form Pemasukan
-const form = reactive({
-  tanggal: new Date().toISOString().slice(0, 10),
-  kategori: 'Persembahan Ibadah',
-  church_name: 'Semua Cabang',
-  nominal: '',
-  metode_pembayaran: 'Tunai',
-  keterangan: '',
-  nama_penyetor: ''
-})
-
 const categories = [
   'Persembahan Ibadah',
   'Perpuluhan Jemaat',
@@ -61,16 +48,6 @@ const categories = [
 
 const paymentMethods = ['Tunai', 'Transfer Bank', 'QRIS Digital']
 
-// Data Dummy Graceful Fallback jika tabel backend masih kosong
-const defaultMockData = [
-  { id: 1, nomor_transaksi: 'IN-2026-001', tanggal: '2026-09-06', kategori: 'Persembahan Ibadah', church_name: 'GracePoint Pusat', nominal: 14500000, metode_pembayaran: 'Tunai', nama_penyetor: 'Majelis Kolekte', keterangan: 'Kolekte Ibadah Raya Minggu Sesi 1 & 2' },
-  { id: 2, nomor_transaksi: 'IN-2026-002', tanggal: '2026-09-06', kategori: 'Perpuluhan Jemaat', church_name: 'GracePoint Pusat', nominal: 28250000, metode_pembayaran: 'Transfer Bank', nama_penyetor: 'Keluarga Bpk. Santoso', keterangan: 'Perpuluhan bulan September' },
-  { id: 3, nomor_transaksi: 'IN-2026-003', tanggal: '2026-09-08', kategori: 'Dana Pembangunan', church_name: 'Cabang GracePoint Barat', nominal: 18000000, metode_pembayaran: 'Transfer Bank', nama_penyetor: 'Donatur Peduli', keterangan: 'Renovasi sound system & ruang ibadah' },
-  { id: 4, nomor_transaksi: 'IN-2026-004', tanggal: '2026-09-10', kategori: 'Ucapan Syukur', church_name: 'Cabang GracePoint Timur', nominal: 5500000, metode_pembayaran: 'QRIS Digital', nama_penyetor: 'Ibu Veronica', keterangan: 'Ucapan syukur baptisan anak' },
-  { id: 5, nomor_transaksi: 'IN-2026-005', tanggal: '2026-09-11', kategori: 'Diakonia / Kasih', church_name: 'GracePoint Pusat', nominal: 7200000, metode_pembayaran: 'Tunai', nama_penyetor: 'Komisi Wanita', keterangan: 'Bakti sosial kasih jemaat lansia' },
-  { id: 6, nomor_transaksi: 'IN-2026-006', tanggal: '2026-09-12', kategori: 'Persembahan Ibadah', church_name: 'Cabang GracePoint Selatan', nominal: 8900000, metode_pembayaran: 'QRIS Digital', nama_penyetor: 'Jemaat Pemuda', keterangan: 'Persembahan Ibadah Youth Fellowship' }
-]
-
 // --- Load Data dari Database / API ---
 const loadData = async () => {
   isLoading.value = true
@@ -80,27 +57,32 @@ const loadData = async () => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
     const [resPemasukan, resChurches] = await Promise.allSettled([
-      fetch(`${APP_CONFIG.apiBaseUrl}/keuangan/pemasukan/?limit=100`, { headers }),
+      fetchAllFinanceRecords(`${APP_CONFIG.apiBaseUrl}/keuangan/pemasukan`, headers),
       fetch(`${APP_CONFIG.apiBaseUrl}/churches/?limit=100`, { headers })
     ])
 
-    if (resPemasukan.status === 'fulfilled' && resPemasukan.value.ok) {
-      const data = await resPemasukan.value.json()
-      if (Array.isArray(data) && data.length > 0) {
-        pemasukanList.value = data
-      } else {
-        pemasukanList.value = defaultMockData
-      }
+    if (resPemasukan.status === 'fulfilled') {
+      pemasukanList.value = resPemasukan.value.map((item) => ({
+          ...item,
+          nominal: Number(item.nominal ?? item.jumlah ?? 0),
+          jumlah: Number(item.jumlah ?? item.nominal ?? 0),
+          nama_penyetor: item.nama_penyetor || item.donor_name || 'Jemaat Terkasih',
+          nomor_transaksi: item.nomor_transaksi || `IN-2026-${String(item.id).padStart(3, '0')}`,
+          church_name: item.church_name || `Cabang ID #${item.church_id || 1}`
+        }))
     } else {
-      pemasukanList.value = defaultMockData
+      pemasukanList.value = []
+      errorMessage.value = 'Data pemasukan tidak dapat dimuat dari server. Coba muat ulang.'
     }
 
     if (resChurches.status === 'fulfilled' && resChurches.value.ok) {
-      churches.value = await resChurches.value.json()
+      const churchData = await resChurches.value.json()
+      churches.value = Array.isArray(churchData) ? churchData : []
     }
   } catch (err) {
-    console.warn('Gagal memuat API keuangan, beralih ke data fallback:', err)
-    pemasukanList.value = defaultMockData
+    console.error('Gagal memuat data pemasukan:', err)
+    pemasukanList.value = []
+    errorMessage.value = 'Terjadi kesalahan saat memuat data pemasukan dari server.'
   } finally {
     isLoading.value = false
   }
@@ -133,7 +115,8 @@ const filteredList = computed(() => {
 // Summary Metrics
 const metrics = computed(() => {
   const total = pemasukanList.value.reduce((acc, curr) => acc + (Number(curr.nominal) || 0), 0)
-  const currentMonthStr = new Date().toISOString().slice(0, 7)
+  const now = new Date()
+  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
   const thisMonth = pemasukanList.value
     .filter((item) => item.tanggal && item.tanggal.startsWith(currentMonthStr))
     .reduce((acc, curr) => acc + (Number(curr.nominal) || 0), 0)
@@ -149,6 +132,28 @@ const metrics = computed(() => {
   return { total, thisMonth, persembahan, perpuluhan }
 })
 
+const currentMonthLabel = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(new Date())
+
+const monthlyTrend = computed(() => {
+  const months = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date()
+    date.setDate(1)
+    date.setMonth(date.getMonth() - 5 + index)
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    const total = pemasukanList.value
+      .filter(item => item.tanggal && item.tanggal.startsWith(key))
+      .reduce((sum, item) => sum + (Number(item.nominal) || 0), 0)
+
+    return { key, label: date.toLocaleDateString('id-ID', { month: 'short' }), total }
+  })
+  const maxTotal = Math.max(...months.map(month => month.total), 0)
+
+  return months.map(month => ({
+    ...month,
+    height: maxTotal ? Math.max((month.total / maxTotal) * 100, 4) : 0
+  }))
+})
+
 const formatIDR = (num) => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -158,67 +163,9 @@ const formatIDR = (num) => {
 }
 
 // Modal Handlers
-const openAddModal = () => {
-  Object.assign(form, {
-    tanggal: new Date().toISOString().slice(0, 10),
-    kategori: 'Persembahan Ibadah',
-    church_name: 'GracePoint Pusat',
-    nominal: '',
-    metode_pembayaran: 'Tunai',
-    keterangan: '',
-    nama_penyetor: ''
-  })
-  isModalOpen.value = true
-}
-
 const openDetailModal = (item) => {
   selectedItem.value = item
   isDetailModalOpen.value = true
-}
-
-const handleSavePemasukan = async () => {
-  if (!form.nominal || Number(form.nominal) <= 0) {
-    triggerToast('Nominal persembahan wajib diisi dengan benar.', 'error')
-    return
-  }
-
-  isSubmitting.value = true
-  try {
-    const newItem = {
-      id: Date.now(),
-      nomor_transaksi: `IN-2026-${String(pemasukanList.value.length + 1).padStart(3, '0')}`,
-      tanggal: form.tanggal,
-      kategori: form.kategori,
-      church_name: form.church_name,
-      nominal: Number(form.nominal),
-      metode_pembayaran: form.metode_pembayaran,
-      nama_penyetor: form.nama_penyetor || 'Jemaat Terkasih',
-      keterangan: form.keterangan || 'Pencatatan kas pemasukan gereja'
-    }
-
-    // Coba simpan ke API jika server mendukung
-    try {
-      const token = storage.get(STORAGE_KEYS.AUTH_TOKEN)
-      await fetch(`${APP_CONFIG.apiBaseUrl}/keuangan/pemasukan/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify(newItem)
-      })
-    } catch (e) {
-      // Local addition fallback
-    }
-
-    pemasukanList.value.unshift(newItem)
-    triggerToast('Pemasukan kas gereja berhasil dicatat dalam buku kas.')
-    isModalOpen.value = false
-  } catch (err) {
-    triggerToast('Gagal menyimpan pemasukan.', 'error')
-  } finally {
-    isSubmitting.value = false
-  }
 }
 
 // --- Handler Ekspor Laporan ---
@@ -273,12 +220,12 @@ const handleExportJSON = () => {
   exportToJSON({
     title: 'Pemasukan Kas & Persembahan Gereja',
     filename: 'Data_Pemasukan_Gereja',
-    items: filteredList.value,
+    items: pemasukanList.value,
     isPemasukan: true,
-    churchFilter: churchFilter.value
+    churchFilter: 'Semua'
   })
   isExportMenuOpen.value = false
-  triggerToast('Data JSON berhasil diekspor.')
+  triggerToast('Cadangan JSON seluruh data pemasukan berhasil diunduh.')
 }
 </script>
 
@@ -311,13 +258,13 @@ const handleExportJSON = () => {
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-extrabold uppercase tracking-widest mb-2">
               <i class="bi bi-wallet2"></i>
-              <span>Financial Management System</span>
+              <span>Financial Monitoring &amp; Backup</span>
             </div>
             <h1 class="font-serif text-2xl sm:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-300 to-yellow-100">
               Pemasukan Kas &amp; Persembahan Gereja
             </h1>
             <p class="mt-1.5 text-xs sm:text-sm text-[#B8C4C2] max-w-2xl leading-relaxed">
-              Pencatatan transparan persembahan ibadah, perpuluhan jemaat, dana pembangunan gedung, dan persembahan digital QRIS secara real-time.
+              Pemantauan dan pencadangan data pemasukan gereja. Kebijakan serta pencatatan transaksi tetap menjadi kewenangan gereja.
             </p>
           </div>
 
@@ -376,25 +323,22 @@ const handleExportJSON = () => {
                     <i class="bi bi-filetype-json text-sky-400 text-sm"></i>
                     <div>
                       <p class="font-bold">Data JSON Audit</p>
-                      <p class="text-[10px] text-slate-400">Cadangan data digital</p>
+                      <p class="text-[10px] text-slate-400">Cadangan seluruh data transaksi</p>
                     </div>
                   </button>
                 </div>
               </Transition>
             </div>
-
-            <!-- Tombol Catat Baru (Tetap utuh) -->
-            <button 
-              type="button" 
-              @click="openAddModal" 
-              class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-400 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-400 hover:to-amber-300 cursor-pointer sm:w-auto"
-            >
-              <i class="bi bi-plus-circle-fill text-sm"></i>
-              <span>Catat Pemasukan Baru</span>
-            </button>
           </div>
         </div>
       </section>
+
+      <div v-if="errorMessage" role="alert" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs text-rose-200">
+        <span>{{ errorMessage }}</span>
+        <button type="button" @click="loadData" class="shrink-0 rounded-lg border border-rose-400/30 px-3 py-1.5 font-semibold hover:bg-rose-500/15">
+          Muat Ulang
+        </button>
+      </div>
 
       <!-- KPI METRICS -->
       <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -417,7 +361,7 @@ const handleExportJSON = () => {
             </div>
           </div>
           <p class="mt-2 text-xl sm:text-2xl font-black text-amber-300 font-mono">{{ formatIDR(metrics.thisMonth) }}</p>
-          <p class="mt-1 text-[10px] text-slate-400">Pemasukan bulan September 2026</p>
+          <p class="mt-1 text-[10px] text-slate-400">Pemasukan {{ currentMonthLabel }}</p>
         </div>
 
         <div class="rounded-2xl border border-white/10 bg-[#123138]/60 p-4 backdrop-blur-md">
@@ -440,6 +384,30 @@ const handleExportJSON = () => {
           </div>
           <p class="mt-2 text-xl sm:text-2xl font-black text-purple-300 font-mono">{{ formatIDR(metrics.perpuluhan) }}</p>
           <p class="mt-1 text-[10px] text-slate-400">Perpuluhan & pembangunan</p>
+        </div>
+      </section>
+
+      <section class="rounded-3xl border border-white/10 bg-[#123138]/70 p-5 sm:p-6 shadow-xl backdrop-blur-xl">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-white/10 pb-4">
+          <div>
+            <h3 class="font-serif text-lg font-bold text-white">Tren Pemasukan Bulanan</h3>
+            <p class="mt-1 text-xs text-slate-400">Enam bulan terakhir berdasarkan data transaksi yang dimuat.</p>
+          </div>
+          <span class="text-[10px] text-slate-500">Grafik pemantauan • bukan alat persetujuan</span>
+        </div>
+        <div v-if="isLoading" class="py-12 text-center text-xs text-slate-400">Memuat tren pemasukan...</div>
+        <div v-else class="mt-5 flex h-44 items-end gap-2 sm:gap-4">
+          <div v-for="month in monthlyTrend" :key="month.key" class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2">
+            <span class="max-w-full truncate text-[9px] text-slate-400 sm:text-[10px]">{{ month.total ? formatIDR(month.total) : '-' }}</span>
+            <div class="flex h-28 w-full items-end justify-center rounded-t-lg bg-slate-950/50">
+              <div
+                class="w-2/3 rounded-t-md bg-gradient-to-t from-emerald-700 to-amber-400 transition-all"
+                :style="{ height: month.height + '%' }"
+                :title="`${month.label}: ${formatIDR(month.total)}`"
+              ></div>
+            </div>
+            <span class="text-[10px] font-semibold text-slate-300">{{ month.label }}</span>
+          </div>
         </div>
       </section>
 
@@ -571,7 +539,10 @@ const handleExportJSON = () => {
                 </td>
               </tr>
 
-              <tr v-if="filteredList.length === 0">
+              <tr v-if="isLoading">
+                <td colspan="7" class="py-12 text-center text-slate-400">Memuat catatan pemasukan...</td>
+              </tr>
+              <tr v-else-if="filteredList.length === 0">
                 <td colspan="7" class="py-12 text-center text-slate-400">
                   <i class="bi bi-inbox text-2xl block text-slate-600 mb-2"></i>
                   Tidak ada catatan pemasukan yang sesuai kriteria pencarian.
@@ -583,127 +554,6 @@ const handleExportJSON = () => {
       </section>
 
     </div>
-
-    <!-- MODAL CATAT PEMASUKAN BARU -->
-    <Transition name="modal">
-      <div 
-        v-if="isModalOpen" 
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
-      >
-        <div class="w-full max-w-lg rounded-3xl border border-amber-500/30 bg-[#0c1b22] p-6 shadow-2xl text-slate-100 space-y-4">
-          <div class="flex items-center justify-between pb-3 border-b border-white/10">
-            <h3 class="font-serif text-lg font-bold text-white flex items-center gap-2">
-              <i class="bi bi-plus-circle-fill text-amber-400"></i> Catat Pemasukan Kas Baru
-            </h3>
-            <button @click="isModalOpen = false" class="text-slate-400 hover:text-white">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          </div>
-
-          <form @submit.prevent="handleSavePemasukan" class="space-y-3.5 text-xs">
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1" for="pemasukan-nominal">Nominal Kas Masuk (Rp) *</label>
-              <input 
-                id="pemasukan-nominal"
-                v-model="form.nominal"
-                type="number" 
-                required 
-                placeholder="Contoh: 5000000" 
-                class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm font-mono text-emerald-400 outline-none focus:border-amber-400"
-              />
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold text-slate-300 mb-1" for="pemasukan-tanggal">Tanggal Pencatatan *</label>
-                <input 
-                  id="pemasukan-tanggal"
-                  v-model="form.tanggal"
-                  type="date" 
-                  required 
-                  class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-amber-400"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-slate-300 mb-1" for="pemasukan-kategori">Kategori *</label>
-                <select 
-                  id="pemasukan-kategori"
-                  v-model="form.kategori"
-                  class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-amber-400"
-                >
-                  <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold text-slate-300 mb-1" for="pemasukan-church">Cabang Penyelenggara</label>
-                <select 
-                  id="pemasukan-church"
-                  v-model="form.church_name"
-                  class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-amber-400"
-                >
-                  <option value="GracePoint Pusat">GracePoint Pusat</option>
-                  <option v-for="c in churches" :key="c.id" :value="c.church_name">{{ c.church_name }}</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block font-semibold text-slate-300 mb-1" for="pemasukan-metode">Metode Penerimaan</label>
-                <select 
-                  id="pemasukan-metode"
-                  v-model="form.metode_pembayaran"
-                  class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-amber-400"
-                >
-                  <option v-for="m in paymentMethods" :key="m" :value="m">{{ m }}</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1" for="pemasukan-penyetor">Penyetor / Kolektor</label>
-              <input 
-                id="pemasukan-penyetor"
-                v-model="form.nama_penyetor"
-                type="text" 
-                placeholder="Contoh: Majelis Kolekte / Bpk. David" 
-                class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-white outline-none focus:border-amber-400"
-              />
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1" for="pemasukan-keterangan">Keterangan Tambahan</label>
-              <textarea 
-                id="pemasukan-keterangan"
-                v-model="form.keterangan"
-                rows="2"
-                placeholder="Catatan ibadah, nomor rekening, persembahan kasih, dll..."
-                class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-white outline-none focus:border-amber-400"
-              ></textarea>
-            </div>
-
-            <div class="pt-3 border-t border-white/10 flex items-center justify-end gap-2.5">
-              <button 
-                type="button" 
-                @click="isModalOpen = false" 
-                class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-white/10"
-              >
-                Batal
-              </button>
-              <button 
-                type="submit" 
-                :disabled="isSubmitting"
-                class="px-5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold shadow"
-              >
-                {{ isSubmitting ? 'Menyimpan...' : 'Simpan Pemasukan' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Transition>
 
     <!-- MODAL DETAIL PEMASUKAN -->
     <Transition name="modal">

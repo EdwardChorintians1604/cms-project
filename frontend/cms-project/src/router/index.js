@@ -36,10 +36,14 @@ import AttendanceView from '@/pages/attendance/AttendanceView.vue'
 import SacramentView from '@/pages/sacrament/SacramentView.vue'
 import PastoralCareView from '@/pages/pastoral/PastoralCareView.vue'
 import FinanceView from '@/pages/finance/FinanceView.vue'
+import ChurchAdminFinancePemasukan from '@/pages/finance/Church_Admin_Finance_Pemasukan.vue'
+import ChurchAdminFinancePengeluaran from '@/pages/finance/Church_Admin_Finance_Pengeluaran.vue'
+import ChurchAdminGraphic from '@/pages/finance/Church_Admin_Graphic.vue'
 import InventoryView from '@/pages/inventory/InventoryView.vue'
 import ChurchAdminProfileView from '@/pages/church_admin/ChurchAdminProfileView.vue'
 import ChurchStructureView from '@/pages/structure/structure.vue'
 import LembagaPelayananJemaatChurchAdmin from '@/pages/worship/Lembaga_Pelayanan_Jemaat_Church_Admin.vue'
+import DigitalMemberCardView from '@/pages/member/DigitalMemberCardView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -62,6 +66,13 @@ const router = createRouter({
       name: 'home',
       component: HomeView,
       meta: { requiresAuth: false, title: 'Platform Manajemen & Pelayanan Gereja' },
+    },
+    {
+      path: '/kartu-jemaat/:id',
+      alias: ['/digital-member/:id', '/member-card/:id', '/kartu-digital/:id'],
+      name: 'digital-member-card',
+      component: DigitalMemberCardView,
+      meta: { requiresAuth: false, title: 'Kartu Digital Jemaat' },
     },
     {
       path: '/peta-beranda',
@@ -200,6 +211,27 @@ const router = createRouter({
       name: 'church-finance',
       component: FinanceView,
       meta: { requiresAuth: true, role: 'church_admin', title: 'Kasir Persembahan & Keuangan Cabang' },
+    },
+    {
+      path: '/church-finance-pemasukan',
+      alias: ['/pemasukan-cabang', '/church-pemasukan', '/keuangan-pemasukan-cabang'],
+      name: 'church-finance-pemasukan',
+      component: ChurchAdminFinancePemasukan,
+      meta: { requiresAuth: true, role: 'church_admin', title: 'Pemasukan Kas & Persembahan Cabang' },
+    },
+    {
+      path: '/church-finance-pengeluaran',
+      alias: ['/pengeluaran-cabang', '/church-pengeluaran', '/keuangan-pengeluaran-cabang'],
+      name: 'church-finance-pengeluaran',
+      component: ChurchAdminFinancePengeluaran,
+      meta: { requiresAuth: true, role: 'church_admin', title: 'Pengeluaran Kas & Beban Operasional Cabang' },
+    },
+    {
+      path: '/church-finance-graphic',
+      alias: ['/grafik-keuangan-cabang', '/church-graphic', '/grafik-persembahan-cabang'],
+      name: 'church-finance-graphic',
+      component: ChurchAdminGraphic,
+      meta: { requiresAuth: true, role: 'church_admin', title: 'Grafik Laporan Keuangan & Persembahan Cabang' },
     },
     {
       path: '/church-facilities',

@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import MainAdminLayout from '@/layouts/MainAdminLayout.vue'
 import { APP_CONFIG } from '@/config'
 import { STORAGE_KEYS } from '@/constants'
 import { storage } from '@/utils'
 import { exportToCSV, exportToPDF, exportToJSON, downloadServerExport } from '@/utils/exportFinanceReport'
+import { fetchAllFinanceRecords } from '@/utils/fetchAllFinanceRecords'
 
 // --- State Data Utama Pengeluaran ---
 const pengeluaranList = ref([])
@@ -19,10 +20,8 @@ const churchFilter = ref('Semua')
 const statusFilter = ref('Semua')
 
 // Modal
-const isModalOpen = ref(false)
 const isDetailModalOpen = ref(false)
 const selectedItem = ref(null)
-const isSubmitting = ref(false)
 
 // Toast
 const showToast = ref(false)
@@ -39,17 +38,6 @@ const triggerToast = (msg, type = 'success') => {
 }
 
 // Form Pengeluaran
-const form = reactive({
-  tanggal: new Date().toISOString().slice(0, 10),
-  kategori: 'Operasional Gedung & Utilitas',
-  church_name: 'GracePoint Pusat',
-  nominal: '',
-  status: 'Disetujui',
-  keperluan: '',
-  penerima: '',
-  disetujui_oleh: 'Bendahara / Superadmin'
-})
-
 const categories = [
   'Operasional Gedung & Utilitas',
   'Honorarium Pelayan Firman & Musik',
@@ -58,16 +46,6 @@ const categories = [
   'Program Remaja, Pemuda & Sekolah Minggu',
   'Konsumsi & Kelengkapan Ibadah',
   'Lain-lain'
-]
-
-// Data Mock Standar Graceful Fallback
-const defaultMockData = [
-  { id: 1, nomor_voucher: 'OUT-2026-001', tanggal: '2026-09-02', kategori: 'Operasional Gedung & Utilitas', church_name: 'GracePoint Pusat', nominal: 6800000, penerima: 'PLN & PDAM', keperluan: 'Tagihan listrik dan air ruang ibadah utama', status: 'Disetujui', disetujui_oleh: 'Superadmin' },
-  { id: 2, nomor_voucher: 'OUT-2026-002', tanggal: '2026-09-06', kategori: 'Honorarium Pelayan Firman & Musik', church_name: 'GracePoint Pusat', nominal: 4500000, penerima: 'Pdt. Tamu & Pemuji', keperluan: 'Apresiasi pelayan firman Ibadah Raya', status: 'Disetujui', disetujui_oleh: 'Majelis Jemaat' },
-  { id: 3, nomor_voucher: 'OUT-2026-003', tanggal: '2026-09-08', kategori: 'Pemeliharaan Aset & Fasilitas', church_name: 'Cabang GracePoint Barat', nominal: 7800000, penerima: 'CV Audio Pro', keperluan: 'Perbaikan mixer sound system & mic nirkabel', status: 'Disetujui', disetujui_oleh: 'Admin Cabang' },
-  { id: 4, nomor_voucher: 'OUT-2026-004', tanggal: '2026-09-09', kategori: 'Diakonia Sosial & Santunan Kasih', church_name: 'GracePoint Pusat', nominal: 3500000, penerima: 'Jemaat Dhuafa & Sakit', keperluan: 'Bantuan biaya pengobatan 2 warga jemaat', status: 'Disetujui', disetujui_oleh: 'Komisi Diakonia' },
-  { id: 5, nomor_voucher: 'OUT-2026-005', tanggal: '2026-09-11', kategori: 'Program Remaja, Pemuda & Sekolah Minggu', church_name: 'Cabang GracePoint Timur', nominal: 2200000, penerima: 'Guru Sekolah Minggu', keperluan: 'Alat peraga & snack kegiatan sekolah minggu', status: 'Disetujui', disetujui_oleh: 'Admin Cabang' },
-  { id: 6, nomor_voucher: 'OUT-2026-006', tanggal: '2026-09-12', kategori: 'Konsumsi & Kelengkapan Ibadah', church_name: 'Cabang GracePoint Selatan', nominal: 1850000, penerima: 'Seksi Konsumsi', keperluan: 'Roti & anggur perjamuan kudus serta ramah tamah', status: 'Disetujui', disetujui_oleh: 'Superadmin' }
 ]
 
 // --- Load Data dari Backend API ---
@@ -79,27 +57,32 @@ const loadData = async () => {
     const headers = token ? { Authorization: `Bearer ${token}` } : {}
 
     const [resPengeluaran, resChurches] = await Promise.allSettled([
-      fetch(`${APP_CONFIG.apiBaseUrl}/keuangan/pengeluaran/?limit=100`, { headers }),
+      fetchAllFinanceRecords(`${APP_CONFIG.apiBaseUrl}/keuangan/pengeluaran`, headers),
       fetch(`${APP_CONFIG.apiBaseUrl}/churches/?limit=100`, { headers })
     ])
 
-    if (resPengeluaran.status === 'fulfilled' && resPengeluaran.value.ok) {
-      const data = await resPengeluaran.value.json()
-      if (Array.isArray(data) && data.length > 0) {
-        pengeluaranList.value = data
-      } else {
-        pengeluaranList.value = defaultMockData
-      }
+    if (resPengeluaran.status === 'fulfilled') {
+      pengeluaranList.value = resPengeluaran.value.map((item) => ({
+          ...item,
+          nominal: Number(item.nominal ?? item.jumlah ?? 0),
+          jumlah: Number(item.jumlah ?? item.nominal ?? 0),
+          keperluan: item.keperluan || item.keterangan || 'Beban operasional gereja',
+          nomor_voucher: item.nomor_voucher || item.nomor_transaksi || `OUT-${String(item.id).padStart(3, '0')}`,
+          church_name: item.church_name || `Cabang ID #${item.church_id || 1}`
+        }))
     } else {
-      pengeluaranList.value = defaultMockData
+      pengeluaranList.value = []
+      errorMessage.value = 'Data pengeluaran tidak dapat dimuat dari server. Coba muat ulang.'
     }
 
     if (resChurches.status === 'fulfilled' && resChurches.value.ok) {
-      churches.value = await resChurches.value.json()
+      const churchData = await resChurches.value.json()
+      churches.value = Array.isArray(churchData) ? churchData : []
     }
   } catch (err) {
-    console.warn('Gagal memuat API pengeluaran, beralih ke data fallback:', err)
-    pengeluaranList.value = defaultMockData
+    console.error('Gagal memuat data pengeluaran:', err)
+    pengeluaranList.value = []
+    errorMessage.value = 'Terjadi kesalahan saat memuat data pengeluaran dari server.'
   } finally {
     isLoading.value = false
   }
@@ -132,7 +115,8 @@ const filteredList = computed(() => {
 // Metrics KPI
 const metrics = computed(() => {
   const total = pengeluaranList.value.reduce((acc, curr) => acc + (Number(curr.nominal) || 0), 0)
-  const currentMonthStr = new Date().toISOString().slice(0, 7)
+  const now = new Date()
+  const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
   const thisMonth = pengeluaranList.value
     .filter((item) => item.tanggal && item.tanggal.startsWith(currentMonthStr))
     .reduce((acc, curr) => acc + (Number(curr.nominal) || 0), 0)
@@ -148,6 +132,28 @@ const metrics = computed(() => {
   return { total, thisMonth, operasional, pelayanan }
 })
 
+const currentMonthLabel = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(new Date())
+
+const monthlyTrend = computed(() => {
+  const months = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date()
+    date.setDate(1)
+    date.setMonth(date.getMonth() - 5 + index)
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+    const total = pengeluaranList.value
+      .filter(item => item.tanggal && item.tanggal.startsWith(key))
+      .reduce((sum, item) => sum + (Number(item.nominal) || 0), 0)
+
+    return { key, label: date.toLocaleDateString('id-ID', { month: 'short' }), total }
+  })
+  const maxTotal = Math.max(...months.map(month => month.total), 0)
+
+  return months.map(month => ({
+    ...month,
+    height: maxTotal ? Math.max((month.total / maxTotal) * 100, 4) : 0
+  }))
+})
+
 const formatIDR = (num) => {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -156,69 +162,9 @@ const formatIDR = (num) => {
   }).format(num || 0)
 }
 
-// Modal Handlers
-const openAddModal = () => {
-  Object.assign(form, {
-    tanggal: new Date().toISOString().slice(0, 10),
-    kategori: 'Operasional Gedung & Utilitas',
-    church_name: 'GracePoint Pusat',
-    nominal: '',
-    status: 'Disetujui',
-    keperluan: '',
-    penerima: '',
-    disetujui_oleh: 'Superadmin'
-  })
-  isModalOpen.value = true
-}
-
 const openDetailModal = (item) => {
   selectedItem.value = item
   isDetailModalOpen.value = true
-}
-
-const handleSavePengeluaran = async () => {
-  if (!form.nominal || Number(form.nominal) <= 0) {
-    triggerToast('Nominal pengeluaran wajib diisi dengan benar.', 'error')
-    return
-  }
-
-  isSubmitting.value = true
-  try {
-    const newItem = {
-      id: Date.now(),
-      nomor_voucher: `OUT-2026-${String(pengeluaranList.value.length + 1).padStart(3, '0')}`,
-      tanggal: form.tanggal,
-      kategori: form.kategori,
-      church_name: form.church_name,
-      nominal: Number(form.nominal),
-      penerima: form.penerima || 'Vendor / Pelayan Terkait',
-      keperluan: form.keperluan || 'Pengeluaran operasional pelayanan kas gereja',
-      status: form.status || 'Disetujui',
-      disetujui_oleh: form.disetujui_oleh || 'Superadmin'
-    }
-
-    try {
-      const token = storage.get(STORAGE_KEYS.AUTH_TOKEN)
-      await fetch(`${APP_CONFIG.apiBaseUrl}/keuangan/pengeluaran/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
-        },
-        body: JSON.stringify(newItem)
-      })
-    } catch (e) {
-      // Local fallback
-    }
-
-    pengeluaranList.value.unshift(newItem)
-    triggerToast('Pengeluaran kas gereja berhasil diverifikasi dan dicatat.')
-    isModalOpen.value = false
-  } catch (err) {
-    triggerToast('Gagal mencatat pengeluaran.', 'error')
-  } finally {
-    isSubmitting.value = false
-  }
 }
 
 // --- Handler Ekspor Laporan Pengeluaran ---
@@ -273,12 +219,12 @@ const handleExportJSON = () => {
   exportToJSON({
     title: 'Pengeluaran Kas & Beban Operasional Gereja',
     filename: 'Data_Pengeluaran_Gereja',
-    items: filteredList.value,
+    items: pengeluaranList.value,
     isPemasukan: false,
-    churchFilter: churchFilter.value
+    churchFilter: 'Semua'
   })
   isExportMenuOpen.value = false
-  triggerToast('Data JSON pengeluaran berhasil diekspor.')
+  triggerToast('Cadangan JSON seluruh data pengeluaran berhasil diunduh.')
 }
 </script>
 
@@ -317,7 +263,7 @@ const handleExportJSON = () => {
               Pengeluaran Kas &amp; Beban Operasional
             </h1>
             <p class="mt-1.5 text-xs sm:text-sm text-[#B8C4C2] max-w-2xl leading-relaxed">
-              Pengawasan anggaran operasional gedung, pemeliharaan fasilitas gereja, santunan diakonia kasih, dan honorarium pelayanan secara akuntabel.
+              Pemantauan dan pencadangan data pengeluaran gereja. Kebijakan serta pencatatan transaksi tetap menjadi kewenangan gereja.
             </p>
           </div>
 
@@ -376,25 +322,22 @@ const handleExportJSON = () => {
                     <i class="bi bi-filetype-json text-sky-400 text-sm"></i>
                     <div>
                       <p class="font-bold">Data JSON Audit</p>
-                      <p class="text-[10px] text-slate-400">Cadangan data digital</p>
+                      <p class="text-[10px] text-slate-400">Cadangan seluruh data transaksi</p>
                     </div>
                   </button>
                 </div>
               </Transition>
             </div>
-
-            <!-- Tombol Catat Pengeluaran Baru (Tetap utuh) -->
-            <button 
-              type="button" 
-              @click="openAddModal" 
-              class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-400 px-5 py-2.5 text-xs font-bold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:from-amber-400 hover:to-amber-300 cursor-pointer sm:w-auto"
-            >
-              <i class="bi bi-plus-circle-fill text-sm"></i>
-              <span>Catat Pengeluaran Baru</span>
-            </button>
           </div>
         </div>
       </section>
+
+      <div v-if="errorMessage" role="alert" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-xs text-rose-200">
+        <span>{{ errorMessage }}</span>
+        <button type="button" @click="loadData" class="shrink-0 rounded-lg border border-rose-400/30 px-3 py-1.5 font-semibold hover:bg-rose-500/15">
+          Muat Ulang
+        </button>
+      </div>
 
       <!-- KPI METRICS -->
       <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -417,7 +360,7 @@ const handleExportJSON = () => {
             </div>
           </div>
           <p class="mt-2 text-xl sm:text-2xl font-black text-amber-300 font-mono">{{ formatIDR(metrics.thisMonth) }}</p>
-          <p class="mt-1 text-[10px] text-slate-400">Pengeluaran September 2026</p>
+          <p class="mt-1 text-[10px] text-slate-400">Pengeluaran {{ currentMonthLabel }}</p>
         </div>
 
         <div class="rounded-2xl border border-white/10 bg-[#123138]/60 p-4 backdrop-blur-md">
@@ -440,6 +383,30 @@ const handleExportJSON = () => {
           </div>
           <p class="mt-2 text-xl sm:text-2xl font-black text-purple-300 font-mono">{{ formatIDR(metrics.pelayanan) }}</p>
           <p class="mt-1 text-[10px] text-slate-400">Honorarium & kasih sesama</p>
+        </div>
+      </section>
+
+      <section class="rounded-3xl border border-white/10 bg-[#123138]/70 p-5 sm:p-6 shadow-xl backdrop-blur-xl">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-white/10 pb-4">
+          <div>
+            <h3 class="font-serif text-lg font-bold text-white">Tren Pengeluaran Bulanan</h3>
+            <p class="mt-1 text-xs text-slate-400">Enam bulan terakhir berdasarkan data transaksi yang dimuat.</p>
+          </div>
+          <span class="text-[10px] text-slate-500">Grafik pemantauan • bukan alat persetujuan</span>
+        </div>
+        <div v-if="isLoading" class="py-12 text-center text-xs text-slate-400">Memuat tren pengeluaran...</div>
+        <div v-else class="mt-5 flex h-44 items-end gap-2 sm:gap-4">
+          <div v-for="month in monthlyTrend" :key="month.key" class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2">
+            <span class="max-w-full truncate text-[9px] text-slate-400 sm:text-[10px]">{{ month.total ? formatIDR(month.total) : '-' }}</span>
+            <div class="flex h-28 w-full items-end justify-center rounded-t-lg bg-slate-950/50">
+              <div
+                class="w-2/3 rounded-t-md bg-gradient-to-t from-rose-600 to-amber-400 transition-all"
+                :style="{ height: month.height + '%' }"
+                :title="`${month.label}: ${formatIDR(month.total)}`"
+              ></div>
+            </div>
+            <span class="text-[10px] font-semibold text-slate-300">{{ month.label }}</span>
+          </div>
         </div>
       </section>
 
@@ -573,7 +540,10 @@ const handleExportJSON = () => {
                 </td>
               </tr>
 
-              <tr v-if="filteredList.length === 0">
+              <tr v-if="isLoading">
+                <td colspan="7" class="py-12 text-center text-slate-400">Memuat catatan pengeluaran...</td>
+              </tr>
+              <tr v-else-if="filteredList.length === 0">
                 <td colspan="7" class="py-12 text-center text-slate-400">
                   <i class="bi bi-inbox text-2xl block text-slate-600 mb-2"></i>
                   Tidak ada catatan pengeluaran yang sesuai filter pencarian.
@@ -585,116 +555,6 @@ const handleExportJSON = () => {
       </section>
 
     </div>
-
-    <!-- MODAL CATAT PENGELUARAN -->
-    <Transition name="modal">
-      <div 
-        v-if="isModalOpen" 
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
-      >
-        <div class="w-full max-w-lg rounded-3xl border border-rose-500/30 bg-[#0c1b22] p-6 shadow-2xl text-slate-100 space-y-4">
-          <div class="flex items-center justify-between pb-3 border-b border-white/10">
-            <h3 class="font-serif text-lg font-bold text-white flex items-center gap-2">
-              <i class="bi bi-plus-circle-fill text-rose-400"></i> Catat Pengeluaran Kas Baru
-            </h3>
-            <button @click="isModalOpen = false" class="text-slate-400 hover:text-white">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          </div>
-
-          <form @submit.prevent="handleSavePengeluaran" class="space-y-3.5 text-xs">
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1" for="pengeluaran-nominal">Nominal Beban Kas Keluar (Rp) *</label>
-              <input 
-                id="pengeluaran-nominal"
-                v-model="form.nominal"
-                type="number" 
-                required 
-                placeholder="Contoh: 3500000" 
-                class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm font-mono text-rose-400 outline-none focus:border-amber-400"
-              />
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold text-slate-300 mb-1" for="pengeluaran-tanggal">Tanggal Realisasi *</label>
-                <input 
-                  id="pengeluaran-tanggal"
-                  v-model="form.tanggal"
-                  type="date" 
-                  required 
-                  class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-amber-400"
-                />
-              </div>
-
-              <div>
-                <label class="block font-semibold text-slate-300 mb-1" for="pengeluaran-kategori">Kategori Pengeluaran *</label>
-                <select 
-                  id="pengeluaran-kategori"
-                  v-model="form.kategori"
-                  class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-amber-400"
-                >
-                  <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold text-slate-300 mb-1" for="pengeluaran-church">Cabang Terkait</label>
-                <select 
-                  id="pengeluaran-church"
-                  v-model="form.church_name"
-                  class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3 py-2 text-white outline-none focus:border-amber-400"
-                >
-                  <option value="GracePoint Pusat">GracePoint Pusat</option>
-                  <option v-for="c in churches" :key="c.id" :value="c.church_name">{{ c.church_name }}</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block font-semibold text-slate-300 mb-1" for="pengeluaran-penerima">Penerima Dana / Rekanan</label>
-                <input 
-                  id="pengeluaran-penerima"
-                  v-model="form.penerima"
-                  type="text" 
-                  placeholder="Contoh: Toko Sound / Bpk. Yosua" 
-                  class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-white outline-none focus:border-amber-400"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label class="block font-semibold text-slate-300 mb-1" for="pengeluaran-keperluan">Keperluan / Rincian Pengeluaran</label>
-              <textarea 
-                id="pengeluaran-keperluan"
-                v-model="form.keperluan"
-                rows="2"
-                placeholder="Rincian peruntukan dana, persetujuan majelis, dll..."
-                class="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2 text-white outline-none focus:border-amber-400"
-              ></textarea>
-            </div>
-
-            <div class="pt-3 border-t border-white/10 flex items-center justify-end gap-2.5">
-              <button 
-                type="button" 
-                @click="isModalOpen = false" 
-                class="px-4 py-2 rounded-xl border border-slate-700 text-slate-300 hover:bg-white/10"
-              >
-                Batal
-              </button>
-              <button 
-                type="submit" 
-                :disabled="isSubmitting"
-                class="px-5 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold shadow"
-              >
-                {{ isSubmitting ? 'Menyimpan...' : 'Simpan Pengeluaran' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Transition>
 
     <!-- MODAL DETAIL PENGELUARAN -->
     <Transition name="modal">
@@ -731,12 +591,12 @@ const handleExportJSON = () => {
               <span class="text-amber-300 font-semibold">{{ selectedItem.penerima }}</span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-slate-400">Status Verifikasi:</span>
+              <span class="text-slate-400">Status tercatat:</span>
               <span class="text-emerald-400 font-bold">{{ selectedItem.status }}</span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-slate-400">Disetujui Oleh:</span>
-              <span class="text-slate-300">{{ selectedItem.disetujui_oleh || 'Superadmin' }}</span>
+              <span class="text-slate-400">Pihak gereja terkait:</span>
+              <span class="text-slate-300">{{ selectedItem.disetujui_oleh || '-' }}</span>
             </div>
           </div>
 
