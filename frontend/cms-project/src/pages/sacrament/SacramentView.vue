@@ -5,7 +5,7 @@ import Card from '@/components/Card.vue'
 
 // State Filter Kategori Sakramen
 const selectedCategory = ref('all')
-const previewCert = ref(null)
+const requestDetails = ref(null)
 
 // Mock Data Permohonan Sakramen
 const sacramentRequests = ref([
@@ -15,7 +15,7 @@ const sacramentRequests = ref([
     applicant: 'David Wijaya',
     phone: '081344556677',
     plannedDate: '2026-10-18',
-    status: 'Disetujui',
+    status: 'Ditunda',
     minister: 'Pdt. Andreas Wicaksono, M.Th',
     regDate: '2026-09-15'
   },
@@ -45,7 +45,7 @@ const sacramentRequests = ref([
     applicant: 'Michael Pratama & Stephanie Wijaya',
     phone: '081922334455',
     plannedDate: '2026-12-12',
-    status: 'Disetujui',
+    status: 'Disetujui Gereja',
     minister: 'Pdt. Andreas Wicaksono, M.Th',
     regDate: '2026-09-10'
   },
@@ -66,12 +66,8 @@ const filteredRequests = computed(() => {
   return sacramentRequests.value.filter(r => r.type.toLowerCase().includes(selectedCategory.value.toLowerCase()))
 })
 
-const approveRequest = (item) => {
-  item.status = 'Disetujui'
-}
-
-const openCertificateModal = (item) => {
-  previewCert.value = item
+const openRequestDetails = (item) => {
+  requestDetails.value = item
 }
 </script>
 
@@ -115,14 +111,14 @@ const openCertificateModal = (item) => {
         <Card title="Total Pengajuan" subtitle="Bulan September">
           <div class="text-3xl font-bold text-white mt-1">{{ sacramentRequests.length }} <span class="text-xs font-normal text-slate-400">Berkas</span></div>
         </Card>
-        <Card title="Menunggu Verifikasi" subtitle="Perlu rapat majelis">
+        <Card title="Menunggu Majelis" subtitle="Informasi status permohonan">
           <div class="text-3xl font-bold text-amber-400 mt-1">
             {{ sacramentRequests.filter(r => r.status === 'Menunggu Majelis').length }} <span class="text-xs font-normal text-slate-400">Berkas</span>
           </div>
         </Card>
-        <Card title="Telah Disetujui" subtitle="Siap pelaksanaan">
+        <Card title="Disetujui Gereja" subtitle="Informasi dari gereja">
           <div class="text-3xl font-bold text-emerald-400 mt-1">
-            {{ sacramentRequests.filter(r => r.status === 'Disetujui').length }} <span class="text-xs font-normal text-slate-400">Berkas</span>
+            {{ sacramentRequests.filter(r => r.status === 'Disetujui Gereja').length }} <span class="text-xs font-normal text-slate-400">Berkas</span>
           </div>
         </Card>
         <Card title="Selesai & Terbit" subtitle="Dokumen resmi dicetak">
@@ -133,7 +129,7 @@ const openCertificateModal = (item) => {
       </div>
 
       <!-- Inbox Table -->
-      <Card title="Antrean Permohonan Pelayanan Sakramen" subtitle="Daftar berkas masuk dari jemaat cabang">
+      <Card title="Antrean Permohonan Pelayanan Sakramen" subtitle="Status administratif; keputusan pelayanan tetap menjadi kewenangan gereja">
         <div class="overflow-x-auto rounded-xl border border-slate-800">
           <table class="w-full text-left text-xs text-slate-300">
             <thead class="bg-slate-950/80 text-amber-400 text-[11px] uppercase tracking-wider border-b border-slate-800">
@@ -143,7 +139,7 @@ const openCertificateModal = (item) => {
                 <th class="p-3">Pemohon / Calon</th>
                 <th class="p-3">Rencana Tanggal</th>
                 <th class="p-3">Pelayan / Pendeta</th>
-                <th class="p-3">Status Berkas</th>
+                <th class="p-3">Status Permohonan</th>
                 <th class="p-3 text-right">Aksi</th>
               </tr>
             </thead>
@@ -165,10 +161,12 @@ const openCertificateModal = (item) => {
                   <span
                     :class="[
                       'px-2.5 py-1 rounded-full text-[10px] font-bold border',
-                      item.status === 'Disetujui'
+                      item.status === 'Disetujui Gereja'
                         ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
                         : item.status === 'Menunggu Majelis'
                         ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                        : item.status === 'Ditunda'
+                        ? 'bg-orange-500/15 text-orange-300 border-orange-500/30'
                         : 'bg-sky-500/15 text-sky-300 border-sky-500/30'
                     ]"
                   >
@@ -178,19 +176,11 @@ const openCertificateModal = (item) => {
                 <td class="p-3 text-right">
                   <div class="flex items-center justify-end gap-1.5">
                     <button
-                      v-if="item.status === 'Menunggu Majelis'"
-                      @click="approveRequest(item)"
-                      title="Setujui Permohonan"
-                      class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-semibold cursor-pointer"
-                    >
-                      ✓ Setujui
-                    </button>
-                    <button
-                      @click="openCertificateModal(item)"
-                      title="Lihat Draf Surat / Sertifikat"
+                      @click="openRequestDetails(item)"
+                      title="Lihat informasi permohonan"
                       class="px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-[11px] font-medium flex items-center gap-1 cursor-pointer"
                     >
-                      <span>📄 Draf Sertifikat</span>
+                      <span>Detail</span>
                     </button>
                   </div>
                 </td>
@@ -200,71 +190,52 @@ const openCertificateModal = (item) => {
         </div>
       </Card>
 
-      <!-- Modal Draf Surat / Sertifikat Resmi -->
+      <!-- Detail informasi permohonan, bukan keputusan atau dokumen resmi -->
       <div
-        v-if="previewCert"
+        v-if="requestDetails"
         class="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 backdrop-blur-sm p-4"
       >
         <div class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-xl w-full p-6 shadow-2xl space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-slate-800">
             <h3 class="font-bold text-white text-base flex items-center gap-2">
-              <span class="text-amber-400">📜</span> Draf Dokumen Resmi Gereja
+              <span class="text-amber-400">📋</span> Informasi Permohonan
             </h3>
-            <button @click="previewCert = null" class="text-slate-400 hover:text-white text-lg cursor-pointer">&times;</button>
+            <button @click="requestDetails = null" class="text-slate-400 hover:text-white text-lg cursor-pointer">&times;</button>
           </div>
 
-          <!-- Formal Paper Mockup -->
-          <div class="bg-slate-950 border border-amber-500/30 rounded-xl p-6 text-center space-y-4 shadow-inner relative overflow-hidden font-serif">
-            <!-- Kop Gereja -->
-            <div class="border-b-2 border-amber-500/40 pb-3">
-              <h2 class="text-lg font-extrabold text-amber-300 tracking-wider">GEREJA GRACEPOINT INDONESIA</h2>
-              <p class="text-[11px] text-slate-400 font-sans tracking-wide">KANTOR SEKRETARIAT PENGURUS CABANG RESMI</p>
-              <p class="text-[10px] text-slate-500 font-mono mt-0.5">No. Dokumen: {{ previewCert.ticketId }}/DOC/SKR/2026</p>
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-3 text-sm">
+            <div class="flex justify-between gap-4">
+              <span class="text-slate-400">No. Tiket</span>
+              <span class="text-slate-200 font-mono">{{ requestDetails.ticketId }}</span>
             </div>
-
-            <div class="py-2 space-y-2">
-              <h3 class="text-base font-bold text-white uppercase tracking-widest text-decoration-underline">
-                SURAT KETERANGAN {{ previewCert.type.toUpperCase() }}
-              </h3>
-              <p class="text-xs text-slate-300 font-sans leading-relaxed">
-                Menerangkan dengan sesungguhnya bahwa nama jemaat tertera di bawah ini telah terdaftar dan diverifikasi untuk pelayanan sakramen:
-              </p>
-              <div class="my-3 p-3 bg-slate-900/80 rounded-lg border border-slate-800 font-sans text-xs">
-                <p class="font-bold text-amber-300 text-sm">{{ previewCert.applicant }}</p>
-                <p class="text-slate-400 mt-1">Tanggal Pelaksanaan: <span class="text-white font-medium">{{ previewCert.plannedDate }}</span></p>
-                <p class="text-slate-400">Pelayan Firman: <span class="text-white font-medium">{{ previewCert.minister }}</span></p>
-              </div>
+            <div class="flex justify-between gap-4">
+              <span class="text-slate-400">Layanan</span>
+              <span class="text-slate-200 text-right">{{ requestDetails.type }}</span>
             </div>
-
-            <!-- Tanda Tangan & QR Stamp -->
-            <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-[10px] font-sans text-slate-400">
-              <div class="text-left">
-                <p>Terverifikasi Sistem:</p>
-                <p class="font-bold text-emerald-400">STATUS: {{ previewCert.status.toUpperCase() }}</p>
-              </div>
-              <div class="text-right">
-                <p>GracePoint Church Secretary</p>
-                <p class="font-mono text-amber-400/80">E-Signature Ver. 2.4</p>
-              </div>
+            <div class="flex justify-between gap-4">
+              <span class="text-slate-400">Pemohon</span>
+              <span class="text-slate-200 text-right">{{ requestDetails.applicant }}</span>
             </div>
+            <div class="flex justify-between gap-4">
+              <span class="text-slate-400">Tanggal permohonan</span>
+              <span class="text-slate-200 font-mono">{{ requestDetails.regDate }}</span>
+            </div>
+            <div class="flex justify-between gap-4">
+              <span class="text-slate-400">Status yang dicatat</span>
+              <span class="text-slate-200 text-right">{{ requestDetails.status }}</span>
+            </div>
+            <p class="border-t border-slate-800 pt-3 text-xs text-slate-400 leading-relaxed">
+              Status ini merupakan informasi administratif. Keputusan pelayanan sakramen ditetapkan oleh gereja, bukan oleh sistem ini.
+            </p>
           </div>
 
-          <div class="flex items-center justify-between pt-2">
-            <span class="text-xs text-slate-400 font-sans">Format cetak siap diekspor ke PDF / Printer.</span>
-            <div class="flex gap-2">
-              <button
-                @click="previewCert = null"
-                class="px-4 py-2 border border-slate-700 text-xs text-slate-400 hover:text-white rounded-xl cursor-pointer"
-              >
-                Tutup
-              </button>
-              <button
-                @click="previewCert = null"
-                class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-amber-500/20 cursor-pointer"
-              >
-                🖨️ Cetak Surat Keterangan
-              </button>
-            </div>
+          <div class="flex justify-end pt-2">
+            <button
+              @click="requestDetails = null"
+              class="px-4 py-2 border border-slate-700 text-xs text-slate-400 hover:text-white rounded-xl cursor-pointer"
+            >
+              Tutup
+            </button>
           </div>
         </div>
       </div>

@@ -1009,22 +1009,22 @@ onUnmounted(() => {
           v-if="isModalOpen"
           class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
         >
-          <div class="relative w-full max-w-2xl bg-slate-900 border border-amber-500/30 rounded-3xl shadow-2xl overflow-hidden text-xs my-8">
+          <div :class="['relative w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden text-xs my-8 transition-colors border', isDark ? 'bg-slate-900 border-amber-500/30 text-white' : 'bg-white border-amber-300/80 text-slate-900']">
 
             <!-- Modal Header -->
-            <div class="px-6 py-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
+            <div :class="['px-6 py-4 border-b flex items-center justify-between transition-colors', isDark ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-50/80 border-amber-200']">
               <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold">
+                <div :class="['w-7 h-7 rounded-lg flex items-center justify-center font-bold border', isDark ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-amber-100 text-amber-800 border-amber-300']">
                   ✎
                 </div>
                 <div>
-                  <h3 class="font-extrabold text-white text-sm">Edit Data Akun &amp; Cabang Gereja (CRUD)</h3>
-                  <p class="text-[10px] text-slate-400">Perubahan akan langsung diperbarui ke tabel DBMS PostgreSQL (church_admins &amp; churches)</p>
+                  <h3 :class="['font-extrabold text-sm', isDark ? 'text-white' : 'text-slate-900']">Edit Data Akun &amp; Cabang Gereja (CRUD)</h3>
+                  <p :class="['text-[10px]', isDark ? 'text-slate-400' : 'text-slate-600']">Perubahan akan langsung diperbarui ke tabel DBMS PostgreSQL (church_admins &amp; churches)</p>
                 </div>
               </div>
               <button
                 @click="isModalOpen = false"
-                class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                :class="['p-1.5 rounded-lg transition cursor-pointer', isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100']"
               >
                 ✕
               </button>
@@ -1036,64 +1036,89 @@ onUnmounted(() => {
               <!-- Grid 2 Kolom -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <label :class="['block text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
                     Nama Lengkap Pengurus / Admin *
                   </label>
                   <input
                     v-model="editForm.admin_name"
                     type="text"
                     required
-                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-white placeholder-slate-600 outline-none transition font-medium"
+                    :class="[
+                      'w-full px-3.5 py-2.5 rounded-xl border outline-none transition font-medium',
+                      isDark
+                        ? 'bg-slate-950 border-slate-800 text-white placeholder-slate-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                    ]"
                     placeholder="Contoh: Pdt. Yohanes Sitorus, S.Th"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <label :class="['block text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
                     Nama Institusi Gereja Cabang *
                   </label>
                   <input
                     v-model="editForm.church_name"
                     type="text"
                     required
-                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-white placeholder-slate-600 outline-none transition font-medium"
+                    :class="[
+                      'w-full px-3.5 py-2.5 rounded-xl border outline-none transition font-medium',
+                      isDark
+                        ? 'bg-slate-950 border-slate-800 text-white placeholder-slate-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                    ]"
                     placeholder="Contoh: GKPM Cabang Padang"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <label :class="['block text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
                     Nomor WhatsApp / Telepon
                   </label>
                   <input
                     v-model="editForm.phone"
                     type="text"
-                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-white placeholder-slate-600 outline-none transition font-medium"
+                    :class="[
+                      'w-full px-3.5 py-2.5 rounded-xl border outline-none transition font-medium',
+                      isDark
+                        ? 'bg-slate-950 border-slate-800 text-white placeholder-slate-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                    ]"
                     placeholder="Contoh: 081234567890"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <label :class="['block text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
                     Kota / Wilayah Domisili
                   </label>
                   <input
                     v-model="editForm.city"
                     type="text"
-                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-white placeholder-slate-600 outline-none transition font-medium"
+                    :class="[
+                      'w-full px-3.5 py-2.5 rounded-xl border outline-none transition font-medium',
+                      isDark
+                        ? 'bg-slate-950 border-slate-800 text-white placeholder-slate-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                    ]"
                     placeholder="Contoh: Padang, Sumatera Barat"
                   />
                 </div>
 
                 <div class="sm:col-span-2">
-                  <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                  <label :class="['block text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
                     Alamat Email (Akun Login Terdaftar)
                   </label>
                   <input
                     :value="editForm.email"
                     type="email"
                     disabled
-                    class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950/50 border border-slate-800 text-slate-500 font-mono cursor-not-allowed"
+                    :class="[
+                      'w-full px-3.5 py-2.5 rounded-xl border font-mono cursor-not-allowed',
+                      isDark
+                        ? 'bg-slate-950/50 border-slate-800 text-slate-500'
+                        : 'bg-slate-100 border-slate-200 text-slate-500'
+                    ]"
                     title="Alamat email tidak dapat diubah langsung untuk menjaga keamanan sesi."
                   />
                 </div>
@@ -1101,27 +1126,37 @@ onUnmounted(() => {
 
               <!-- Alamat Lengkap -->
               <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                <label :class="['block text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
                   Alamat Lengkap Gedung / Sekretariat Gereja
                 </label>
                 <textarea
                   v-model="editForm.address"
                   rows="2"
-                  class="w-full px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-white placeholder-slate-600 outline-none transition font-medium"
+                  :class="[
+                    'w-full px-3.5 py-2 rounded-xl border outline-none transition font-medium resize-none',
+                    isDark
+                      ? 'bg-slate-950 border-slate-800 text-white placeholder-slate-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                  ]"
                   placeholder="Nama jalan, nomor gedung, kelurahan, kecamatan..."
                 ></textarea>
               </div>
 
               <!-- Map Picker Koordinat -->
-              <div class="space-y-2 pt-2 border-t border-slate-800">
+              <div :class="['space-y-2 pt-2 border-t transition-colors', isDark ? 'border-slate-800' : 'border-slate-200']">
                 <div class="flex items-center justify-between">
-                  <label class="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <label :class="['text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors', isDark ? 'text-amber-400' : 'text-amber-800']">
                     <span>🗺️</span> Geser Pin di Peta untuk Tentukan Koordinat GPS
                   </label>
                   <button
                     type="button"
                     @click="detectCurrentLocation"
-                    class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 font-semibold text-[10px] flex items-center gap-1 transition cursor-pointer"
+                    :class="[
+                      'px-2.5 py-1 rounded-lg font-semibold text-[10px] flex items-center gap-1 transition cursor-pointer border',
+                      isDark
+                        ? 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-slate-700'
+                        : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300'
+                    ]"
                   >
                     <span>🛰️</span> Gunakan GPS Saya
                   </button>
@@ -1129,40 +1164,50 @@ onUnmounted(() => {
 
                 <div class="grid grid-cols-2 gap-3">
                   <div>
-                    <label class="block text-[9px] text-slate-500 mb-0.5">Latitude</label>
+                    <label :class="['block text-[9px] mb-0.5', isDark ? 'text-slate-500' : 'text-slate-600']">Latitude</label>
                     <input
                       v-model.number="editForm.latitude"
                       @input="onCoordInputChange"
                       type="number"
                       step="any"
-                      class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-white font-mono text-xs focus:border-amber-400 outline-none"
+                      :class="[
+                        'w-full px-3 py-1.5 rounded-lg font-mono text-xs outline-none transition border',
+                        isDark
+                          ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-400'
+                          : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                      ]"
                       placeholder="-0.957573"
                     />
                   </div>
                   <div>
-                    <label class="block text-[9px] text-slate-500 mb-0.5">Longitude</label>
+                    <label :class="['block text-[9px] mb-0.5', isDark ? 'text-slate-500' : 'text-slate-600']">Longitude</label>
                     <input
                       v-model.number="editForm.longitude"
                       @input="onCoordInputChange"
                       type="number"
                       step="any"
-                      class="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-white font-mono text-xs focus:border-amber-400 outline-none"
+                      :class="[
+                        'w-full px-3 py-1.5 rounded-lg font-mono text-xs outline-none transition border',
+                        isDark
+                          ? 'bg-slate-950 border-slate-800 text-white focus:border-amber-400'
+                          : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                      ]"
                       placeholder="100.364578"
                     />
                   </div>
                 </div>
 
-                <div class="rounded-xl overflow-hidden border border-slate-800 shadow-inner bg-slate-950">
+                <div :class="['rounded-xl overflow-hidden border shadow-inner', isDark ? 'border-slate-800 bg-slate-950' : 'border-slate-300 bg-white']">
                   <div ref="editMapContainer" class="edit-map-container"></div>
                 </div>
               </div>
 
               <!-- Modal Footer -->
-              <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+              <div :class="['flex items-center justify-end gap-3 pt-4 border-t transition-colors', isDark ? 'border-slate-800' : 'border-slate-200']">
                 <button
                   type="button"
                   @click="isModalOpen = false"
-                  class="px-4 py-2 rounded-xl text-slate-400 hover:text-white font-semibold cursor-pointer"
+                  :class="['px-4 py-2 rounded-xl font-semibold cursor-pointer transition border', isDark ? 'text-slate-400 hover:text-white border-transparent' : 'text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-300']"
                 >
                   Batal
                 </button>
@@ -1186,26 +1231,26 @@ onUnmounted(() => {
           v-if="isConfirmModalOpen"
           class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md"
         >
-          <div class="relative w-full max-w-sm bg-slate-900 border border-amber-500/40 rounded-3xl shadow-2xl p-6 text-xs text-center space-y-4">
-            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl mx-auto">
+          <div :class="['relative w-full max-w-sm rounded-3xl shadow-2xl p-6 text-xs text-center space-y-4 border transition-colors', isDark ? 'bg-slate-900 border-amber-500/40 text-white' : 'bg-white border-amber-300 text-slate-900']">
+            <div :class="['w-12 h-12 rounded-2xl flex items-center justify-center text-xl mx-auto border', isDark ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-amber-100 border-amber-300 text-amber-800']">
               💾
             </div>
             <div>
-              <h3 class="text-base font-extrabold text-white">Konfirmasi Pembaruan DBMS</h3>
-              <p class="text-slate-400 mt-1 leading-relaxed">
+              <h3 :class="['text-base font-extrabold', isDark ? 'text-white' : 'text-slate-900']">Konfirmasi Pembaruan DBMS</h3>
+              <p :class="['mt-1 leading-relaxed', isDark ? 'text-slate-400' : 'text-slate-600']">
                 Apakah Anda yakin ingin menyimpan perubahan data cabang gereja ini ke basis data PostgreSQL?
               </p>
             </div>
-            <div class="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-left space-y-1 text-[11px]">
-              <p class="text-slate-300"><strong>Admin:</strong> {{ editForm.admin_name }}</p>
-              <p class="text-slate-300"><strong>Gereja:</strong> {{ editForm.church_name }}</p>
-              <p class="text-slate-300"><strong>Kota:</strong> {{ editForm.city || '-' }}</p>
+            <div :class="['p-3 rounded-xl border text-left space-y-1 text-[11px] transition-colors', isDark ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-50/60 border-amber-200']">
+              <p :class="isDark ? 'text-slate-300' : 'text-slate-800'"><strong>Admin:</strong> {{ editForm.admin_name }}</p>
+              <p :class="isDark ? 'text-slate-300' : 'text-slate-800'"><strong>Gereja:</strong> {{ editForm.church_name }}</p>
+              <p :class="isDark ? 'text-slate-300' : 'text-slate-800'"><strong>Kota:</strong> {{ editForm.city || '-' }}</p>
             </div>
             <div class="flex items-center justify-center gap-3 pt-2">
               <button
                 type="button"
                 @click="isConfirmModalOpen = false"
-                class="px-4 py-2 rounded-xl text-slate-400 hover:text-white font-semibold cursor-pointer"
+                :class="['px-4 py-2 rounded-xl font-semibold cursor-pointer transition border', isDark ? 'text-slate-400 hover:text-white border-transparent' : 'text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-300']"
               >
                 Kembali
               </button>
@@ -1229,21 +1274,21 @@ onUnmounted(() => {
           v-if="isPasswordModalOpen"
           class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
         >
-          <div class="relative w-full max-w-md bg-slate-900 border border-amber-500/30 rounded-3xl shadow-2xl overflow-hidden text-xs">
+          <div :class="['relative w-full max-w-md rounded-3xl shadow-2xl overflow-hidden text-xs border transition-colors', isDark ? 'bg-slate-900 border-amber-500/30 text-white' : 'bg-white border-amber-300 text-slate-900']">
 
-            <div class="px-6 py-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between">
+            <div :class="['px-6 py-4 border-b flex items-center justify-between transition-colors', isDark ? 'bg-slate-950/80 border-slate-800' : 'bg-amber-50/80 border-amber-200']">
               <div class="flex items-center gap-2.5">
-                <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold">
+                <div :class="['w-7 h-7 rounded-lg flex items-center justify-center font-bold border', isDark ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : 'bg-amber-100 text-amber-800 border-amber-300']">
                   🔒
                 </div>
                 <div>
-                  <h3 class="font-extrabold text-white text-sm">Ganti Kata Sandi Akun</h3>
-                  <p class="text-[10px] text-slate-400">Kata sandi baru akan di-hash secara aman di basis data PostgreSQL</p>
+                  <h3 :class="['font-extrabold text-sm', isDark ? 'text-white' : 'text-slate-900']">Ganti Kata Sandi Akun</h3>
+                  <p :class="['text-[10px]', isDark ? 'text-slate-400' : 'text-slate-600']">Kata sandi baru akan di-hash secara aman di basis data PostgreSQL</p>
                 </div>
               </div>
               <button
                 @click="isPasswordModalOpen = false"
-                class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
+                :class="['p-1.5 rounded-lg transition cursor-pointer', isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100']"
               >
                 ✕
               </button>
@@ -1251,7 +1296,7 @@ onUnmounted(() => {
 
             <form @submit.prevent="handleSavePassword" class="p-6 space-y-4">
               <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                <label :class="['block text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
                   Kata Sandi Baru *
                 </label>
                 <input
@@ -1259,13 +1304,18 @@ onUnmounted(() => {
                   type="password"
                   required
                   minlength="6"
-                  class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-white placeholder-slate-600 outline-none transition font-medium"
+                  :class="[
+                    'w-full px-3.5 py-2.5 rounded-xl border outline-none transition font-medium',
+                    isDark
+                      ? 'bg-slate-950 border-slate-800 text-white placeholder-slate-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                  ]"
                   placeholder="Minimal 6 karakter"
                 />
               </div>
 
               <div>
-                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                <label :class="['block text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
                   Konfirmasi Kata Sandi Baru *
                 </label>
                 <input
@@ -1273,16 +1323,21 @@ onUnmounted(() => {
                   type="password"
                   required
                   minlength="6"
-                  class="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-white placeholder-slate-600 outline-none transition font-medium"
+                  :class="[
+                    'w-full px-3.5 py-2.5 rounded-xl border outline-none transition font-medium',
+                    isDark
+                      ? 'bg-slate-950 border-slate-800 text-white placeholder-slate-600 focus:border-amber-400 focus:ring-1 focus:ring-amber-400'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                  ]"
                   placeholder="Ulangi kata sandi baru"
                 />
               </div>
 
-              <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+              <div :class="['flex items-center justify-end gap-3 pt-3 border-t transition-colors', isDark ? 'border-slate-800' : 'border-slate-200']">
                 <button
                   type="button"
                   @click="isPasswordModalOpen = false"
-                  class="px-4 py-2 rounded-xl text-slate-400 hover:text-white font-semibold cursor-pointer"
+                  :class="['px-4 py-2 rounded-xl font-semibold cursor-pointer transition border', isDark ? 'text-slate-400 hover:text-white border-transparent' : 'text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-300']"
                 >
                   Batal
                 </button>

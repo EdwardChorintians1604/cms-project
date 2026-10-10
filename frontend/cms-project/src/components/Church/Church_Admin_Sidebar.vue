@@ -3,9 +3,34 @@ import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useSidebar } from '@/composables/useSidebar'
 import { useAuth } from '@/composables/useAuth'
+import { useTheme } from '@/composables/useTheme'
 
 const { isSidebarOpen, toggleSidebar, closeSidebar } = useSidebar()
 const { user } = useAuth()
+const { isDark, toggleTheme } = useTheme()
+
+// Helper mapping warna badge untuk dark vs light mode
+const getBadgeClass = (item) => {
+  if (isDark.value) {
+    return item.badgeColor || 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+  }
+  const badgeMap = {
+    'Live': 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold',
+    'GPS': 'bg-cyan-100 text-cyan-800 border-cyan-300 font-bold',
+    'Akun': 'bg-amber-100 text-amber-900 border-amber-300 font-bold',
+    'Bagan': 'bg-amber-100 text-amber-900 border-amber-300 font-bold',
+    'Komisi': 'bg-cyan-100 text-cyan-800 border-cyan-300 font-bold',
+    'CRM': 'bg-amber-100 text-amber-900 border-amber-300 font-bold',
+    'Alert': 'bg-rose-100 text-rose-800 border-rose-300 font-bold',
+    'Roster': 'bg-purple-100 text-purple-800 border-purple-300 font-bold',
+    'Inbox': 'bg-sky-100 text-sky-800 border-sky-300 font-bold',
+    'Privat': 'bg-rose-100 text-rose-800 border-rose-300 font-bold',
+    'Kasir': 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold',
+    'Booking': 'bg-indigo-100 text-indigo-800 border-indigo-300 font-bold',
+    'Scan': 'bg-emerald-100 text-emerald-800 border-emerald-300 font-bold'
+  }
+  return badgeMap[item.badge] || 'bg-amber-100 text-amber-800 border-amber-300 font-bold'
+}
 
 // Collapsible state for each category (8 Categories)
 const openSections = ref({
@@ -228,9 +253,12 @@ const menuSections = [
   <!-- Aside: Menjangkau dari paling atas layar (top-0 h-screen z-[60]) di atas navbar -->
   <aside
     :class="[
-      'w-[82vw] sm:w-72 lg:w-72 max-w-[300px] bg-[var(--theme-bg-secondary)] text-[var(--theme-text-primary)] border-r border-[var(--theme-border-soft)] p-3.5 sm:p-4 flex flex-col justify-between font-sans text-xs shadow-2xl shrink-0 backdrop-blur-xl overflow-y-auto custom-scrollbar',
+      'w-[82vw] sm:w-72 lg:w-72 max-w-[300px] border-r p-3.5 sm:p-4 flex flex-col justify-between font-sans text-xs shadow-2xl shrink-0 backdrop-blur-xl overflow-y-auto custom-scrollbar',
       'fixed inset-y-0 left-0 top-0 z-[60] h-screen transition-transform duration-300 ease-in-out',
-      isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
+      isDark
+        ? 'bg-[var(--theme-bg-secondary)] text-[var(--theme-text-primary)] border-[var(--theme-border-soft)]'
+        : 'bg-white text-slate-800 border-slate-200 shadow-slate-300/40'
     ]"
   >
 
@@ -238,48 +266,95 @@ const menuSections = [
     <div class="space-y-4">
 
       <!-- Sidebar Header & Close Toggle -->
-      <div class="flex items-center justify-between pb-3 border-b border-amber-500/20">
+      <div :class="[
+        'flex items-center justify-between pb-3 border-b transition-colors',
+        isDark ? 'border-amber-500/20' : 'border-amber-300/40'
+      ]">
         <div class="flex items-center gap-2.5">
           <div class="relative flex h-2.5 w-2.5">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
           </div>
-          <span class="text-amber-300 font-extrabold tracking-widest text-[11px] uppercase">CHURCH ADMIN</span>
+          <span :class="[
+            'font-extrabold tracking-widest text-[11px] uppercase transition-colors',
+            isDark ? 'text-amber-300' : 'text-amber-800'
+          ]">CHURCH ADMIN</span>
         </div>
 
-        <button
-          @click="closeSidebar"
-          title="Tutup Sidebar"
-          class="p-1.5 text-slate-400 hover:text-amber-300 hover:bg-amber-500/10 rounded-xl border border-slate-800 hover:border-amber-500/30 transition-all duration-200 flex items-center justify-center cursor-pointer"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-          </svg>
-        </button>
+        <div class="flex items-center gap-1.5">
+          <!-- Quick Theme Toggle in Header -->
+          <button
+            @click="toggleTheme"
+            type="button"
+            :title="isDark ? 'Beralih ke Mode Terang (Siang) ☀️' : 'Beralih ke Mode Gelap (Malam) 🌙'"
+            :aria-label="isDark ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap'"
+            :class="[
+              'p-1.5 rounded-xl border transition-all duration-200 flex items-center justify-center cursor-pointer',
+              isDark
+                ? 'text-amber-300 hover:text-amber-200 hover:bg-amber-500/15 border-amber-500/30'
+                : 'text-amber-700 hover:text-amber-900 hover:bg-amber-100 border-amber-300'
+            ]"
+          >
+            <span class="text-xs leading-none">{{ isDark ? '🌙' : '☀️' }}</span>
+          </button>
+
+          <!-- Close Sidebar Button -->
+          <button
+            @click="closeSidebar"
+            title="Tutup Sidebar"
+            aria-label="Tutup Sidebar"
+            :class="[
+              'p-1.5 rounded-xl border transition-all duration-200 flex items-center justify-center cursor-pointer',
+              isDark
+                ? 'text-slate-400 hover:text-amber-300 hover:bg-amber-500/10 border-slate-800 hover:border-amber-500/30'
+                : 'text-slate-600 hover:text-amber-800 hover:bg-amber-100 border-slate-300 hover:border-amber-400'
+            ]"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+            </svg>
+          </button>
+        </div>
       </div>
 
       <!-- Identitas Akun Admin Cabang Yang Sedang Login -->
-      <div class="p-3 bg-gradient-to-br from-slate-900 via-slate-950 to-amber-950/30 border border-amber-500/30 rounded-xl shadow-lg relative overflow-hidden group">
+      <div :class="[
+        'p-3 border rounded-xl shadow-lg relative overflow-hidden group transition-all duration-200',
+        isDark
+          ? 'bg-gradient-to-br from-slate-900 via-slate-950 to-amber-950/30 border-amber-500/30'
+          : 'bg-gradient-to-br from-amber-50/90 via-white to-amber-100/60 border-amber-300/80 shadow-amber-500/5'
+      ]">
         <div class="flex items-start gap-2.5">
           <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-amber-500 to-yellow-400 text-slate-950 font-black text-sm flex items-center justify-center shrink-0 shadow-md">
             {{ user?.admin_name?.charAt(0) || user?.full_name?.charAt(0) || user?.name?.charAt(0) || 'A' }}
           </div>
           <div class="min-w-0 flex-1">
-            <p class="font-extrabold text-white text-xs truncate leading-snug">
+            <p :class="['font-extrabold text-xs truncate leading-snug', isDark ? 'text-white' : 'text-slate-900']">
               {{ user?.admin_name || user?.full_name || user?.name || 'Admin Gereja' }}
             </p>
-            <p class="text-[10px] text-amber-300 font-semibold truncate leading-tight mt-0.5 flex items-center gap-1">
+            <p :class="['text-[10px] font-semibold truncate leading-tight mt-0.5 flex items-center gap-1', isDark ? 'text-amber-300' : 'text-amber-700']">
               <span>⛪</span> {{ user?.church_name || 'GracePoint Cabang' }}
             </p>
             <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
-              <span v-if="user?.church_code" class="px-1.5 py-0.5 bg-amber-500/20 text-amber-300 rounded text-[9px] font-mono font-bold border border-amber-500/30">
+              <span
+                v-if="user?.church_code"
+                :class="[
+                  'px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border',
+                  isDark
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                    : 'bg-amber-100 text-amber-900 border-amber-300'
+                ]"
+              >
                 {{ user.church_code }}
               </span>
-              <span v-if="user?.city" class="text-[9px] text-slate-400 truncate max-w-[80px]">
+              <span
+                v-if="user?.city"
+                :class="['text-[9px] truncate max-w-[80px]', isDark ? 'text-slate-400' : 'text-slate-600']"
+              >
                 📍 {{ user.city }}
               </span>
-              <span class="inline-flex items-center gap-1 text-[9px] text-emerald-400 font-semibold">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span :class="['inline-flex items-center gap-1 text-[9px] font-semibold', isDark ? 'text-emerald-400' : 'text-emerald-600']">
+                <span :class="['w-1.5 h-1.5 rounded-full', isDark ? 'bg-emerald-400' : 'bg-emerald-500']"></span>
                 Aktif
               </span>
             </div>
@@ -289,13 +364,45 @@ const menuSections = [
         <RouterLink
           to="/church-profile"
           @click="closeSidebar"
-          class="mt-2.5 w-full py-1.5 px-2 bg-amber-500/10 hover:bg-amber-500/25 border border-amber-500/30 hover:border-amber-400 text-amber-300 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 transition no-underline shadow-sm"
+          :class="[
+            'mt-2.5 w-full py-1.5 px-2 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1.5 transition no-underline shadow-xs border',
+            isDark
+              ? 'bg-amber-500/10 hover:bg-amber-500/25 border-amber-500/30 hover:border-amber-400 text-amber-300'
+              : 'bg-amber-100 hover:bg-amber-200 border-amber-300 hover:border-amber-400 text-amber-900 font-bold'
+          ]"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
           </svg>
           <span>Kelola Akun Admin &amp; Cabang</span>
         </RouterLink>
+      </div>
+
+      <!-- Quick Theme Switcher Pill Inside Sidebar Tools Panel -->
+      <div :class="[
+        'p-2 rounded-xl border flex items-center justify-between gap-2 shadow-xs transition-colors',
+        isDark
+          ? 'bg-slate-950/80 border-slate-800/90 text-slate-300'
+          : 'bg-slate-100/90 border-slate-200 text-slate-700'
+      ]">
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs">{{ isDark ? '🌙' : '☀️' }}</span>
+          <span class="text-[10px] font-bold tracking-wide uppercase">
+            Tema: <span :class="isDark ? 'text-amber-400' : 'text-amber-700'">{{ isDark ? 'Mode Gelap' : 'Mode Terang' }}</span>
+          </span>
+        </div>
+        <button
+          @click="toggleTheme"
+          type="button"
+          :class="[
+            'px-2 py-1 rounded-lg text-[10px] font-bold transition flex items-center gap-1 border cursor-pointer',
+            isDark
+              ? 'bg-amber-500/15 text-amber-300 border-amber-500/30 hover:bg-amber-500/25'
+              : 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200'
+          ]"
+        >
+          <span>{{ isDark ? '☀️ Beralih Terang' : '🌙 Beralih Gelap' }}</span>
+        </button>
       </div>
 
       <!-- Navigation Accordion Sections -->
@@ -310,12 +417,20 @@ const menuSections = [
             @click="toggleSection(sIdx)"
             :aria-expanded="openSections[sIdx]"
             :aria-controls="`sidebar-section-${sIdx}`"
-            class="w-full px-2.5 py-1.5 rounded-lg bg-slate-950/70 border border-slate-800/80 text-[10px] font-extrabold text-amber-400/90 tracking-widest uppercase transition cursor-pointer select-none group flex items-center justify-between hover:bg-slate-900 hover:text-amber-300"
+            :class="[
+              'w-full px-2.5 py-1.5 rounded-lg border text-[10px] font-extrabold tracking-widest uppercase transition cursor-pointer select-none group flex items-center justify-between',
+              isDark
+                ? 'bg-slate-950/70 border-slate-800/80 text-amber-400/90 hover:bg-slate-900 hover:text-amber-300'
+                : 'bg-slate-100/90 border-slate-200/90 text-slate-800 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-300'
+            ]"
           >
             <span>{{ section.title }}</span>
             <svg
-              class="w-3 h-3 text-slate-500 group-hover:text-amber-400 transition-transform duration-200"
-              :class="{ 'rotate-180': openSections[sIdx] }"
+              :class="[
+                'w-3 h-3 transition-transform duration-200',
+                openSections[sIdx] ? 'rotate-180' : '',
+                isDark ? 'text-slate-500 group-hover:text-amber-400' : 'text-slate-400 group-hover:text-amber-700'
+              ]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -332,28 +447,45 @@ const menuSections = [
                 :key="iIdx"
                 :to="item.path"
                 @click="closeSidebar"
-                class="group px-3 py-2 rounded-xl text-slate-300 hover:bg-gradient-to-r hover:from-amber-500/20 hover:to-amber-500/5 hover:text-amber-300 transition-all duration-200 font-medium flex items-center justify-between leading-tight border border-transparent hover:border-amber-500/30 no-underline"
-                active-class="bg-gradient-to-r from-amber-500/25 via-amber-500/10 to-transparent text-amber-300 font-bold border-l-2 border-amber-400 shadow-md shadow-amber-500/10"
+                :class="[
+                  'group px-3 py-2 rounded-xl transition-all duration-200 font-medium flex items-center justify-between leading-tight border no-underline',
+                  isDark
+                    ? 'text-slate-300 border-transparent hover:bg-gradient-to-r hover:from-amber-500/20 hover:to-amber-500/5 hover:text-amber-300 hover:border-amber-500/30'
+                    : 'text-slate-700 border-transparent hover:bg-amber-50/90 hover:text-amber-900 hover:border-amber-200'
+                ]"
+                :active-class="
+                  isDark
+                    ? 'bg-gradient-to-r from-amber-500/25 via-amber-500/10 to-transparent text-amber-300 font-bold border-l-2 border-amber-400 shadow-md shadow-amber-500/10'
+                    : 'bg-gradient-to-r from-amber-100/90 via-amber-50/50 to-transparent text-amber-900 font-bold border-l-2 border-amber-600 shadow-sm shadow-amber-600/10 border-amber-200'
+                "
               >
                 <div class="flex items-center gap-2.5 min-w-0">
                   <svg
                     v-if="item.icon"
-                    class="w-4 h-4 text-amber-400/80 group-hover:text-amber-300 shrink-0 transition-transform group-hover:scale-110"
+                    :class="[
+                      'w-4 h-4 shrink-0 transition-transform group-hover:scale-110',
+                      isDark ? 'text-amber-400/80 group-hover:text-amber-300' : 'text-amber-600 group-hover:text-amber-800'
+                    ]"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="item.icon"/>
                   </svg>
-                  <span v-else class="w-1.5 h-1.5 rounded-full bg-amber-400/80 shrink-0 ml-1"></span>
+                  <span v-else :class="['w-1.5 h-1.5 rounded-full shrink-0 ml-1', isDark ? 'bg-amber-400/80' : 'bg-amber-600']"></span>
 
-                  <span class="truncate text-xs text-slate-200 group-hover:text-amber-300 leading-snug">{{ item.name }}</span>
+                  <span :class="[
+                    'truncate text-xs leading-snug',
+                    isDark ? 'text-slate-200 group-hover:text-amber-300' : 'text-slate-700 group-hover:text-amber-900 font-medium'
+                  ]">
+                    {{ item.name }}
+                  </span>
                 </div>
 
                 <!-- Optional Badge -->
                 <span
                   v-if="item.badge"
-                  :class="['px-1.5 py-0.5 text-[9px] font-extrabold rounded-md border shrink-0 ml-1.5', item.badgeColor || 'bg-amber-500/15 text-amber-300 border-amber-500/30']"
+                  :class="['px-1.5 py-0.5 text-[9px] font-extrabold rounded-md border shrink-0 ml-1.5', getBadgeClass(item)]"
                 >
                   {{ item.badge }}
                 </span>
@@ -367,11 +499,19 @@ const menuSections = [
     </div>
 
     <!-- Bottom System Status Card -->
-    <div class="pt-3 border-t border-amber-500/20 mt-4 text-xs text-slate-400 font-sans space-y-2 shrink-0">
-      <div class="bg-slate-950/90 border border-slate-800/90 rounded-xl p-3 space-y-1.5 shadow-inner">
+    <div :class="[
+      'pt-3 border-t mt-4 text-xs font-sans space-y-2 shrink-0 transition-colors',
+      isDark ? 'border-amber-500/20 text-slate-400' : 'border-amber-300/40 text-slate-600'
+    ]">
+      <div :class="[
+        'rounded-xl p-3 space-y-1.5 shadow-xs border transition-colors',
+        isDark
+          ? 'bg-slate-950/90 border-slate-800/90'
+          : 'bg-slate-100/90 border-slate-200'
+      ]">
         <div class="flex items-center justify-between text-[11px]">
-          <span class="text-slate-400 font-medium">PostgreSQL Server:</span>
-          <span class="text-emerald-400 font-bold flex items-center gap-1.5">
+          <span :class="isDark ? 'text-slate-400 font-medium' : 'text-slate-600 font-medium'">PostgreSQL Server:</span>
+          <span :class="['font-bold flex items-center gap-1.5', isDark ? 'text-emerald-400' : 'text-emerald-600']">
             <span class="relative flex h-2 w-2">
               <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -379,7 +519,7 @@ const menuSections = [
             Online
           </span>
         </div>
-        <div class="flex items-center justify-between text-[10px] text-slate-500 font-mono">
+        <div class="flex items-center justify-between text-[10px] font-mono text-slate-500">
           <span>Engine: Neon Cloud</span>
           <span>Port: 5432</span>
         </div>
@@ -408,7 +548,7 @@ button:focus, button:focus-visible {
   width: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(6, 9, 19, 0.8);
+  background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: rgba(245, 158, 11, 0.35);

@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import ChurchAdminLayout from '@/layouts/ChurchAdminLayout.vue'
 import Card from '@/components/Card.vue'
 import { useAuth } from '@/composables/useAuth'
+import { useTheme } from '@/composables/useTheme'
 import { APP_CONFIG } from '@/config'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -15,6 +16,7 @@ import imgAppHand from '@/assets/images/manajemen_gereja_3.jpg'
 import imgGracePoint from '@/assets/images/GracePoint.png'
 
 const { user } = useAuth()
+const { isDark, toggleTheme } = useTheme()
 
 // State data gereja & admin
 const isLoading = ref(true)
@@ -589,43 +591,136 @@ onUnmounted(() => {
       <!-- ======================================================== -->
       <!-- 1. GRAND HERO BANNER - ADMIN COMMAND CONSOLE             -->
       <!-- ======================================================== -->
-      <section class="admin-hero-card relative rounded-3xl overflow-hidden shadow-2xl border border-amber-500/30">
+      <section 
+        :class="[
+          'relative rounded-3xl overflow-hidden shadow-2xl border transition-all duration-300',
+          isDark
+            ? 'admin-hero-card border-amber-500/30'
+            : 'admin-hero-card-light border-amber-300/80 shadow-amber-500/5'
+        ]"
+      >
         <!-- Deep Ambient Background Layers -->
         <div class="hero-bg-texture"></div>
         <div class="hero-overlay-glow"></div>
+
+        <!-- Top Utility Header Bar (Zonasi Atas: Role/Status Badge & Modern Segmented Switcher Tema Gelap - Terang) -->
+        <div
+          :class="[
+            'relative z-10 flex items-center justify-between gap-4 px-6 py-3.5 sm:px-10 border-b transition-colors',
+            isDark ? 'border-amber-500/15 bg-slate-950/40' : 'border-amber-300/40 bg-amber-50/50'
+          ]"
+        >
+          <!-- Badge Status Portal -->
+          <div
+            :class="[
+              'inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase border transition-colors',
+              isDark
+                ? 'bg-amber-500/15 border-amber-400/40 text-amber-300'
+                : 'bg-amber-100/90 border-amber-300 text-amber-900'
+            ]"
+          >
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Portal Administrator Cabang Gereja</span>
+            <span class="text-amber-500/60">•</span>
+            <span :class="isDark ? 'text-slate-300 font-normal' : 'text-slate-600 font-medium'">GracePoint Ecosystem</span>
+          </div>
+
+          <!-- Fitur Penggantian Warna Gelap - Terang (Modern Segmented Switcher) -->
+          <div class="flex items-center gap-2">
+            <span :class="['text-[11px] font-bold hidden sm:inline transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
+              Tema:
+            </span>
+            <div
+              class="inline-flex items-center p-0.5 rounded-xl border transition-all duration-300 shadow-2xs"
+              :class="isDark ? 'bg-slate-950/80 border-slate-800' : 'bg-white border-amber-300/70'"
+              role="group"
+              aria-label="Pilihan Tema Gelap atau Terang"
+            >
+              <button
+                @click="!isDark && toggleTheme()"
+                type="button"
+                id="btn-theme-dark"
+                :class="[
+                  'px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer',
+                  isDark
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-sm font-extrabold'
+                    : 'text-slate-500 hover:text-slate-800'
+                ]"
+                title="Aktifkan Mode Gelap (Dark Mode) 🌙"
+              >
+                <span>🌙</span>
+                <span class="hidden sm:inline">Gelap</span>
+              </button>
+              <button
+                @click="isDark && toggleTheme()"
+                type="button"
+                id="btn-theme-light"
+                :class="[
+                  'px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer',
+                  !isDark
+                    ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-sm font-extrabold'
+                    : 'text-slate-400 hover:text-white'
+                ]"
+                title="Aktifkan Mode Terang (Light Mode) ☀️"
+              >
+                <span>☀️</span>
+                <span class="hidden sm:inline">Terang</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <div class="relative z-10 p-6 sm:p-10 lg:p-12 flex flex-col lg:flex-row items-center justify-between gap-8">
           
           <!-- Kolom Kiri: Branding & Greeting -->
           <div class="flex-1 text-center lg:text-left space-y-4 max-w-2xl">
-            <!-- Badge Status Portal -->
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/15 border border-amber-400/40 text-amber-300 text-xs font-semibold tracking-wider uppercase">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Portal Administrator Cabang Gereja</span>
-              <span class="text-amber-500/60">•</span>
-              <span class="text-slate-300 font-normal">GracePoint Ecosystem</span>
-            </div>
-
             <!-- Title dengan Gaya Cinzel HomeView -->
-            <h1 class="hero-cinzel-title text-2xl sm:text-4xl lg:text-5xl font-bold font-serif text-amber-300 tracking-wide leading-tight">
+            <h1 
+              :class="[
+                'hero-cinzel-title text-2xl sm:text-4xl lg:text-5xl font-bold font-serif tracking-wide leading-tight transition-colors',
+                isDark ? 'text-amber-300' : 'text-amber-800'
+              ]"
+            >
               Selamat Datang di Portal Admin Gereja
             </h1>
 
-            <p class="text-slate-300 text-sm sm:text-base leading-relaxed">
+            <p :class="['text-sm sm:text-base leading-relaxed transition-colors', isDark ? 'text-slate-300' : 'text-slate-600']">
               Pusat kendali eksekutif untuk pengelolaan titik geolocation gereja di peta publik, sinkronisasi jadwal pelayanan jemaat, manajemen presensi ibadah, serta publikasi warta cabang langsung ke DBMS PostgreSQL.
             </p>
 
             <!-- Dynamic Active Church Ribbon -->
-            <div class="p-4 rounded-2xl bg-slate-950/75 border border-amber-500/30 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div 
+              :class="[
+                'p-4 rounded-2xl border backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-xs transition-colors',
+                isDark
+                  ? 'bg-slate-950/75 border-amber-500/30 text-white'
+                  : 'bg-white/95 border-amber-300/80 text-slate-900 shadow-md shadow-amber-500/5'
+              ]"
+            >
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/40 text-amber-300 flex items-center justify-center text-lg shadow-inner">
+                <div 
+                  :class="[
+                    'w-10 h-10 rounded-xl border flex items-center justify-center text-lg shadow-inner transition-colors',
+                    isDark
+                      ? 'bg-amber-500/20 border-amber-400/40 text-amber-300'
+                      : 'bg-amber-100 border-amber-300 text-amber-800'
+                  ]"
+                >
                   <i class="bi bi-building"></i>
                 </div>
                 <div>
-                  <div class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Gereja Dikelola Saat Ini:</div>
-                  <div class="text-sm font-bold text-white font-serif flex items-center gap-2">
+                  <div :class="['text-[11px] uppercase tracking-wider font-semibold', isDark ? 'text-slate-400' : 'text-slate-500']">Gereja Dikelola Saat Ini:</div>
+                  <div :class="['text-sm font-bold font-serif flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900']">
                     <span>{{ locationForm.church_name || 'Menghubungkan ke Server...' }}</span>
-                    <span v-if="locationForm.church_code" class="px-2 py-0.5 rounded text-[10px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    <span 
+                      v-if="locationForm.church_code" 
+                      :class="[
+                        'px-2 py-0.5 rounded text-[10px] font-mono border font-bold',
+                        isDark
+                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                          : 'bg-amber-100 text-amber-900 border-amber-300'
+                      ]"
+                    >
                       {{ locationForm.church_code }}
                     </span>
                   </div>
@@ -633,7 +728,14 @@ onUnmounted(() => {
               </div>
 
               <div class="flex items-center gap-2">
-                <span class="px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-mono text-[11px] font-bold flex items-center gap-1.5">
+                <span 
+                  :class="[
+                    'px-3 py-1 rounded-lg border font-mono text-[11px] font-bold flex items-center gap-1.5 transition-colors',
+                    isDark
+                      ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                      : 'bg-emerald-100 border-emerald-300 text-emerald-800'
+                  ]"
+                >
                   <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                   PostgreSQL Terkoneksi
                 </span>
@@ -652,7 +754,12 @@ onUnmounted(() => {
 
               <a 
                 href="#pelayanan-cabang" 
-                class="px-4 py-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-amber-300 border border-amber-500/40 font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:scale-[1.02] transition-all cursor-pointer shadow-lg"
+                :class="[
+                  'px-4 py-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center gap-2 hover:scale-[1.02] transition-all cursor-pointer shadow-lg border',
+                  isDark
+                    ? 'bg-slate-900/90 hover:bg-slate-800 text-amber-300 border-amber-500/40'
+                    : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300'
+                ]"
               >
                 <i class="bi bi-broadcast-pin text-sm"></i>
                 <span>Kelola Pelayanan Cabang</span>
@@ -660,7 +767,12 @@ onUnmounted(() => {
 
               <RouterLink 
                 to="/church-attendance" 
-                class="px-4 py-3 rounded-xl bg-slate-950/80 hover:bg-slate-900 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-semibold flex items-center gap-2 transition"
+                :class="[
+                  'px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-2 transition border',
+                  isDark
+                    ? 'bg-slate-950/80 hover:bg-slate-900 text-slate-300 hover:text-white border-slate-700/80'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300 shadow-xs'
+                ]"
               >
                 <i class="bi bi-qr-code text-sm text-sky-400"></i>
                 <span>Presensi Ibadah</span>
@@ -668,7 +780,12 @@ onUnmounted(() => {
 
               <RouterLink 
                 to="/church-members" 
-                class="px-4 py-3 rounded-xl bg-slate-950/80 hover:bg-slate-900 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-semibold flex items-center gap-2 transition"
+                :class="[
+                  'px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-2 transition border',
+                  isDark
+                    ? 'bg-slate-950/80 hover:bg-slate-900 text-slate-300 hover:text-white border-slate-700/80'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300 shadow-xs'
+                ]"
               >
                 <i class="bi bi-people text-sm text-emerald-400"></i>
                 <span>Data Jemaat</span>
@@ -681,21 +798,33 @@ onUnmounted(() => {
           <div class="flex flex-col items-center text-center space-y-4 max-w-xs">
             <div class="relative group">
               <div class="absolute -inset-2 bg-gradient-to-r from-amber-500 to-amber-300 rounded-full blur-xl opacity-30 group-hover:opacity-60 transition duration-500"></div>
-              <div class="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full p-2 bg-slate-950 border-2 border-amber-400/60 shadow-2xl flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-105">
+              <div 
+                :class="[
+                  'relative w-36 h-36 sm:w-44 sm:h-44 rounded-full p-2 border-2 shadow-2xl flex items-center justify-center overflow-hidden transition-transform duration-300 hover:scale-105',
+                  isDark ? 'bg-slate-950 border-amber-400/60' : 'bg-white border-amber-400/80 shadow-amber-500/10'
+                ]"
+              >
                 <img :src="imgGracePoint" alt="GracePoint Emblem" class="w-28 h-28 sm:w-36 sm:h-36 object-contain drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
               </div>
             </div>
 
             <!-- Scripture Gold Card -->
-            <div class="p-3.5 rounded-2xl bg-slate-950/80 border border-amber-500/25 shadow-xl text-left space-y-1.5">
-              <div class="flex items-center gap-2 text-amber-400 text-xs font-serif font-bold">
+            <div 
+              :class="[
+                'p-3.5 rounded-2xl border shadow-xl text-left space-y-1.5 transition-colors',
+                isDark
+                  ? 'bg-slate-950/80 border-amber-500/25'
+                  : 'bg-white/95 border-amber-300/80 shadow-amber-500/5'
+              ]"
+            >
+              <div :class="['flex items-center gap-2 text-xs font-serif font-bold', isDark ? 'text-amber-400' : 'text-amber-800']">
                 <i class="bi bi-quote text-base"></i>
                 <span>Prinsip Pelayanan Tertib</span>
               </div>
-              <p class="text-[11px] text-slate-300 italic font-serif leading-relaxed">
+              <p :class="['text-[11px] italic font-serif leading-relaxed', isDark ? 'text-slate-300' : 'text-slate-700']">
                 "Tetapi segala sesuatu harus berlangsung dengan sopan dan teratur, sebab Allah kita bukan Allah yang menghendaki kekacauan."
               </p>
-              <div class="text-[10px] text-amber-300/80 font-mono text-right font-semibold">
+              <div :class="['text-[10px] font-mono text-right font-semibold', isDark ? 'text-amber-300/80' : 'text-amber-700']">
                 — 1 Korintus 14:33, 40
               </div>
             </div>
@@ -710,13 +839,13 @@ onUnmounted(() => {
       <section class="space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-lg sm:text-xl font-bold font-serif text-white flex items-center gap-2">
+            <h2 :class="['text-lg sm:text-xl font-bold font-serif flex items-center gap-2 transition-colors', isDark ? 'text-white' : 'text-slate-900']">
               <i class="bi bi-speedometer2 text-amber-400"></i>
               <span>Ringkasan Statistik & Indikator Cabang</span>
             </h2>
-            <p class="text-xs text-slate-400">Metrik operasional jemaat dan kehadiran ibadah gereja cabang Anda.</p>
+            <p :class="['text-xs transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">Metrik operasional jemaat dan kehadiran ibadah gereja cabang Anda.</p>
           </div>
-          <span class="text-xs text-slate-500 font-mono hidden sm:inline-block">Auto-Synced with PostgreSQL</span>
+          <span :class="['text-xs font-mono hidden sm:inline-block', isDark ? 'text-slate-500' : 'text-slate-500']">Auto-Synced with PostgreSQL</span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
@@ -724,7 +853,7 @@ onUnmounted(() => {
           <!-- Stat 1: Total Jemaat Terdaftar -->
           <div class="stat-card group">
             <div class="flex items-center justify-between w-full mb-2">
-              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Jemaat</span>
+              <span :class="['text-xs font-semibold uppercase tracking-wider', isDark ? 'text-slate-400' : 'text-slate-600']">Total Jemaat</span>
               <div class="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center text-sm shadow-inner group-hover:scale-110 transition-transform">
                 <i class="bi bi-people-fill"></i>
               </div>
@@ -732,61 +861,61 @@ onUnmounted(() => {
             <div class="text-3xl sm:text-4xl font-bold font-serif text-amber-400 tracking-tight my-1">
               1,248
             </div>
-            <div class="w-full flex items-center justify-between text-xs pt-2 border-t border-slate-800">
-              <span class="text-slate-400">Aktif Terdaftar</span>
-              <span class="text-emerald-400 font-semibold font-mono text-[11px]">+12 Jiwa Baru</span>
+            <div :class="['w-full flex items-center justify-between text-xs pt-2 border-t', isDark ? 'border-slate-800' : 'border-slate-200']">
+              <span :class="isDark ? 'text-slate-400' : 'text-slate-600'">Aktif Terdaftar</span>
+              <span class="text-emerald-500 font-semibold font-mono text-[11px]">+12 Jiwa Baru</span>
             </div>
           </div>
 
           <!-- Stat 2: Kehadiran Minggu Lalu -->
           <div class="stat-card group">
             <div class="flex items-center justify-between w-full mb-2">
-              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Kehadiran Terakhir</span>
+              <span :class="['text-xs font-semibold uppercase tracking-wider', isDark ? 'text-slate-400' : 'text-slate-600']">Kehadiran Terakhir</span>
               <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-sm shadow-inner group-hover:scale-110 transition-transform">
                 <i class="bi bi-calendar2-check-fill"></i>
               </div>
             </div>
-            <div class="text-3xl sm:text-4xl font-bold font-serif text-emerald-400 tracking-tight my-1">
+            <div class="text-3xl sm:text-4xl font-bold font-serif text-emerald-500 tracking-tight my-1">
               892
             </div>
-            <div class="w-full flex items-center justify-between text-xs pt-2 border-t border-slate-800">
-              <span class="text-slate-400">Ibadah Raya 1 & 2</span>
-              <span class="text-emerald-400 font-semibold font-mono text-[11px]">71.4% Kuota</span>
+            <div :class="['w-full flex items-center justify-between text-xs pt-2 border-t', isDark ? 'border-slate-800' : 'border-slate-200']">
+              <span :class="isDark ? 'text-slate-400' : 'text-slate-600'">Ibadah Raya 1 & 2</span>
+              <span class="text-emerald-500 font-semibold font-mono text-[11px]">71.4% Kuota</span>
             </div>
           </div>
 
           <!-- Stat 3: Total Keluarga / KK -->
           <div class="stat-card group">
             <div class="flex items-center justify-between w-full mb-2">
-              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Kepala Keluarga</span>
+              <span :class="['text-xs font-semibold uppercase tracking-wider', isDark ? 'text-slate-400' : 'text-slate-600']">Kepala Keluarga</span>
               <div class="w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-400 flex items-center justify-center text-sm shadow-inner group-hover:scale-110 transition-transform">
                 <i class="bi bi-house-heart-fill"></i>
               </div>
             </div>
-            <div class="text-3xl sm:text-4xl font-bold font-serif text-sky-400 tracking-tight my-1">
+            <div class="text-3xl sm:text-4xl font-bold font-serif text-sky-500 tracking-tight my-1">
               340
             </div>
-            <div class="w-full flex items-center justify-between text-xs pt-2 border-t border-slate-800">
-              <span class="text-slate-400">Terdata dalam Rayon</span>
-              <span class="text-sky-300 font-semibold font-mono text-[11px]">8 Wilayah</span>
+            <div :class="['w-full flex items-center justify-between text-xs pt-2 border-t', isDark ? 'border-slate-800' : 'border-slate-200']">
+              <span :class="isDark ? 'text-slate-400' : 'text-slate-600'">Terdata dalam Rayon</span>
+              <span :class="['font-semibold font-mono text-[11px]', isDark ? 'text-sky-300' : 'text-sky-700']">8 Wilayah</span>
             </div>
           </div>
 
           <!-- Stat 4: Program Pelayanan & Geolocation Status -->
           <div class="stat-card group">
             <div class="flex items-center justify-between w-full mb-2">
-              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Pelayanan & Peta</span>
+              <span :class="['text-xs font-semibold uppercase tracking-wider', isDark ? 'text-slate-400' : 'text-slate-600']">Pelayanan & Peta</span>
               <div class="w-8 h-8 rounded-lg bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center text-sm shadow-inner group-hover:scale-110 transition-transform">
                 <i class="bi bi-broadcast-pin"></i>
               </div>
             </div>
-            <div class="text-2xl sm:text-3xl font-bold font-serif text-white tracking-tight my-1 flex items-center gap-2">
+            <div :class="['text-2xl sm:text-3xl font-bold font-serif tracking-tight my-1 flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900']">
               <span>{{ branchServices.length }}</span>
-              <span class="text-xs font-sans text-slate-400 font-normal">Program</span>
+              <span :class="['text-xs font-sans font-normal', isDark ? 'text-slate-400' : 'text-slate-500']">Program</span>
             </div>
-            <div class="w-full flex items-center justify-between text-xs pt-2 border-t border-slate-800">
-              <span class="text-slate-400">Peta Geolocation:</span>
-              <span class="text-emerald-400 font-semibold font-mono text-[11px] flex items-center gap-1">
+            <div :class="['w-full flex items-center justify-between text-xs pt-2 border-t', isDark ? 'border-slate-800' : 'border-slate-200']">
+              <span :class="isDark ? 'text-slate-400' : 'text-slate-600'">Peta Geolocation:</span>
+              <span class="text-emerald-500 font-semibold font-mono text-[11px] flex items-center gap-1">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                 Terkoneksi
               </span>
@@ -801,14 +930,14 @@ onUnmounted(() => {
       <!-- ======================================================== -->
       <section class="space-y-4">
         <div>
-          <div class="flex items-center gap-2 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-1">
+          <div class="flex items-center gap-2 text-amber-500 text-xs font-semibold uppercase tracking-wider mb-1">
             <i class="bi bi-grid-fill"></i>
             <span>Modul Operasional Gereja Cabang</span>
           </div>
-          <h2 class="text-xl sm:text-2xl font-bold font-serif text-white">
+          <h2 :class="['text-xl sm:text-2xl font-bold font-serif transition-colors', isDark ? 'text-white' : 'text-slate-900']">
             Pusat Akses Layanan & Administrasi
           </h2>
-          <p class="text-slate-400 text-xs sm:text-sm mt-0.5">
+          <p :class="['text-xs sm:text-sm mt-0.5 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
             Pintasan cepat untuk mengelola kehadiran jemaat, permohonan sakramen, dan sinkronisasi informasi publik.
           </p>
         </div>
@@ -831,11 +960,16 @@ onUnmounted(() => {
                   Pantau kehadiran jemaat saat ibadah raya, scan barcode kehadiran mandiri, dan integrasi catatan kehadiran rayon secara real-time.
                 </p>
               </div>
-              <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
-                <span class="text-[11px] text-slate-400 font-mono">Kode QR Dinamis</span>
+              <div :class="['pt-4 mt-3 border-t flex items-center justify-between', isDark ? 'border-slate-800/80' : 'border-slate-200']">
+                <span :class="['text-[11px] font-mono', isDark ? 'text-slate-400' : 'text-slate-500']">Kode QR Dinamis</span>
                 <RouterLink 
                   to="/church-attendance" 
-                  class="px-3.5 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition flex items-center gap-1"
+                  :class="[
+                    'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border',
+                    isDark
+                      ? 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border-emerald-500/30'
+                      : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border-emerald-300'
+                  ]"
                 >
                   <span>Buka Presensi</span>
                   <i class="bi bi-arrow-right"></i>
@@ -860,11 +994,16 @@ onUnmounted(() => {
                   Kelola data keanggotaan keluarga jemaat, verifikasi permohonan sakramen pernikahan dan baptisan, serta koordinasi rayon sel.
                 </p>
               </div>
-              <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
-                <span class="text-[11px] text-slate-400 font-mono">Rayon & Keluarga</span>
+              <div :class="['pt-4 mt-3 border-t flex items-center justify-between', isDark ? 'border-slate-800/80' : 'border-slate-200']">
+                <span :class="['text-[11px] font-mono', isDark ? 'text-slate-400' : 'text-slate-500']">Rayon & Keluarga</span>
                 <RouterLink 
                   to="/church-members" 
-                  class="px-3.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-semibold transition flex items-center gap-1"
+                  :class="[
+                    'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border',
+                    isDark
+                      ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30'
+                      : 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300'
+                  ]"
                 >
                   <span>Kelola Jemaat</span>
                   <i class="bi bi-arrow-right"></i>
@@ -889,11 +1028,16 @@ onUnmounted(() => {
                   Sinkronkan koordinat fisik gedung gereja ke Google Maps serta publikasikan jadwal ibadah dan warta agar tampil di portal jemaat.
                 </p>
               </div>
-              <div class="pt-4 mt-3 border-t border-slate-800/80 flex items-center justify-between">
-                <span class="text-[11px] text-slate-400 font-mono">CartoDB & Leaflet</span>
+              <div :class="['pt-4 mt-3 border-t flex items-center justify-between', isDark ? 'border-slate-800/80' : 'border-slate-200']">
+                <span :class="['text-[11px] font-mono', isDark ? 'text-slate-400' : 'text-slate-500']">CartoDB & Leaflet</span>
                 <a 
                   href="#geolocation" 
-                  class="px-3.5 py-1.5 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-xs font-semibold transition flex items-center gap-1"
+                  :class="[
+                    'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center gap-1 border',
+                    isDark
+                      ? 'bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border-sky-500/30'
+                      : 'bg-sky-100 hover:bg-sky-200 text-sky-900 border-sky-300'
+                  ]"
                 >
                   <span>Atur Lokasi</span>
                   <i class="bi bi-arrow-down-short"></i>
@@ -901,40 +1045,50 @@ onUnmounted(() => {
               </div>
             </div>
           </div>
-
         </div>
       </section>
 
       <!-- ======================================================== -->
       <!-- 4. SECTION GEOLOCATION & GOOGLE MAPS MANAGER             -->
       <!-- ======================================================== -->
-      <section id="geolocation" class="bg-slate-900/90 border border-amber-500/30 rounded-3xl p-5 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+      <section 
+        id="geolocation" 
+        :class="[
+          'rounded-3xl p-5 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6 border transition-colors',
+          isDark ? 'bg-slate-900/90 border-amber-500/30' : 'bg-white border-amber-300/80 shadow-amber-500/5'
+        ]"
+      >
         
         <!-- Header Section Geolocation -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+        <div :class="['flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b transition-colors', isDark ? 'border-slate-800' : 'border-slate-200']">
           <div>
-            <div class="flex items-center gap-2 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-1">
+            <div class="flex items-center gap-2 text-amber-500 text-xs font-semibold uppercase tracking-wider mb-1">
               <i class="bi bi-geo-alt-fill"></i>
               <span>Fitur Geolocation & Google Maps Terintegrasi</span>
             </div>
-            <h2 class="text-xl sm:text-2xl font-bold font-serif text-white">
+            <h2 :class="['text-xl sm:text-2xl font-bold font-serif transition-colors', isDark ? 'text-white' : 'text-slate-900']">
               Peta Lokasi & Koordinat Gereja (Admin Control)
             </h2>
-            <p class="text-slate-400 text-xs sm:text-sm mt-1">
+            <p :class="['text-xs sm:text-sm mt-1 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
               Tentukan posisi pasti gereja Anda dengan menggeser pin di peta, mencari alamat, atau memanfaatkan GPS langsung dari perangkat Anda. Titik ini akan langsung tampil di Beranda Pengguna.
             </p>
           </div>
 
           <!-- Switcher Pilih Gereja Jika Ada Lebih dari 1 -->
           <div class="flex items-center gap-3">
-            <label class="text-xs text-slate-400 font-semibold whitespace-nowrap">Gereja Dikelola:</label>
+            <label :class="['text-xs font-semibold whitespace-nowrap', isDark ? 'text-slate-400' : 'text-slate-600']">Gereja Dikelola:</label>
             <select 
               :value="selectedAdminId"
               @change="(e) => {
                 const adm = allChurchAdmins.find(a => a.id === Number(e.target.value))
                 if (adm) selectAdminChurch(adm)
               }"
-              class="bg-slate-950 border border-amber-500/40 text-amber-300 text-xs rounded-xl px-3 py-2 outline-none focus:border-amber-400 max-w-[240px] cursor-pointer shadow-inner"
+              :class="[
+                'text-xs rounded-xl px-3 py-2 outline-none max-w-[240px] cursor-pointer shadow-inner border transition-colors',
+                isDark 
+                  ? 'bg-slate-950 border-amber-500/40 text-amber-300 focus:border-amber-400' 
+                  : 'bg-slate-50 border-amber-300 text-amber-900 focus:border-amber-500'
+              ]"
             >
               <option v-for="adm in allChurchAdmins" :key="adm.id" :value="adm.id">
                 {{ adm.church_name }} ({{ adm.city || 'Cabang' }})
@@ -944,16 +1098,16 @@ onUnmounted(() => {
         </div>
 
         <!-- Feedback Alert Messages -->
-        <div v-if="saveSuccessMessage" class="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs sm:text-sm flex items-start gap-3 animate-scaleUp">
-          <i class="bi bi-check-circle-fill text-emerald-400 text-base flex-shrink-0 mt-0.5"></i>
+        <div v-if="saveSuccessMessage" class="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs sm:text-sm flex items-start gap-3 animate-scaleUp">
+          <i class="bi bi-check-circle-fill text-emerald-500 text-base flex-shrink-0 mt-0.5"></i>
           <div>
             <strong class="font-serif">Berhasil Tersimpan!</strong>
             <p class="mt-0.5">{{ saveSuccessMessage }}</p>
           </div>
         </div>
 
-        <div v-if="saveErrorMessage" class="p-4 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300 text-xs sm:text-sm flex items-start gap-3 animate-scaleUp">
-          <i class="bi bi-exclamation-triangle-fill text-rose-400 text-base flex-shrink-0 mt-0.5"></i>
+        <div v-if="saveErrorMessage" class="p-4 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-400 text-xs sm:text-sm flex items-start gap-3 animate-scaleUp">
+          <i class="bi bi-exclamation-triangle-fill text-rose-500 text-base flex-shrink-0 mt-0.5"></i>
           <div>
             <strong class="font-serif">Perhatian:</strong>
             <p class="mt-0.5">{{ saveErrorMessage }}</p>
@@ -967,17 +1121,22 @@ onUnmounted(() => {
           <div class="lg:col-span-7 space-y-3">
             
             <!-- Tool Control Bar di atas peta -->
-            <div class="flex flex-wrap items-center justify-between gap-2.5 p-3 bg-slate-950/80 border border-slate-800 rounded-xl">
+            <div :class="['flex flex-wrap items-center justify-between gap-2.5 p-3 rounded-xl border transition-colors', isDark ? 'bg-slate-950/80 border-slate-800' : 'bg-slate-100/90 border-slate-200']">
               <!-- Fitur GPS Auto-Detect -->
               <button 
                 type="button"
                 @click="detectCurrentLocation" 
                 :disabled="gpsLoading"
-                class="px-3.5 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-sm"
+                :class="[
+                  'px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-xs border',
+                  isDark
+                    ? 'bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border-emerald-500/40'
+                    : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border-emerald-300'
+                ]"
                 title="Ambil titik koordinat GPS perangkat Anda saat ini"
               >
-                <span v-if="gpsLoading" class="inline-block w-3.5 h-3.5 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></span>
-                <i v-else class="bi bi-crosshair text-sm text-emerald-400"></i>
+                <span v-if="gpsLoading" class="inline-block w-3.5 h-3.5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></span>
+                <i v-else class="bi bi-crosshair text-sm text-emerald-500"></i>
                 <span>{{ gpsLoading ? 'Mendeteksi GPS...' : 'Ambil Lokasi Saya (GPS)' }}</span>
               </button>
 
@@ -989,13 +1148,23 @@ onUnmounted(() => {
                     @keyup.enter="searchAddress"
                     type="text" 
                     placeholder="Cari jalan / kelurahan / kota..."
-                    class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-xs rounded-xl px-3 py-2 outline-none focus:border-amber-400 transition"
+                    :class="[
+                      'w-full text-xs rounded-xl px-3 py-2 outline-none transition border',
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-slate-200 focus:border-amber-400'
+                        : 'bg-white border-slate-300 text-slate-900 focus:border-amber-500'
+                    ]"
                   />
                   <button 
                     type="button"
                     @click="searchAddress" 
                     :disabled="searchLoading"
-                    class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition border border-slate-700 cursor-pointer"
+                    :class="[
+                      'px-3.5 py-2 rounded-xl text-xs font-semibold transition border cursor-pointer',
+                      isDark
+                        ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+                        : 'bg-slate-200 hover:bg-slate-300 text-slate-800 border-slate-300'
+                    ]"
                   >
                     <span v-if="searchLoading" class="inline-block w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></span>
                     <i v-else class="bi bi-search"></i>
@@ -1003,14 +1172,23 @@ onUnmounted(() => {
                 </div>
 
                 <!-- Dropdown Hasil Pencarian Alamat -->
-                <div v-if="searchResults.length > 0" class="absolute left-0 right-0 top-full mt-1 bg-slate-950 border border-amber-500/40 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto">
+                <div 
+                  v-if="searchResults.length > 0" 
+                  :class="[
+                    'absolute left-0 right-0 top-full mt-1 rounded-xl shadow-2xl z-50 max-h-48 overflow-y-auto border',
+                    isDark ? 'bg-slate-950 border-amber-500/40 text-slate-300' : 'bg-white border-amber-300 text-slate-800'
+                  ]"
+                >
                   <div 
                     v-for="(res, idx) in searchResults" 
                     :key="idx"
                     @click="applySearchResult(res)"
-                    class="p-2.5 hover:bg-amber-500/15 border-b border-slate-800/80 text-[11px] text-slate-300 cursor-pointer transition flex items-start gap-2"
+                    :class="[
+                      'p-2.5 border-b text-[11px] cursor-pointer transition flex items-start gap-2',
+                      isDark ? 'hover:bg-amber-500/15 border-slate-800/80 text-slate-300' : 'hover:bg-amber-50 border-slate-100 text-slate-700'
+                    ]"
                   >
-                    <i class="bi bi-geo-alt text-amber-400 mt-0.5"></i>
+                    <i class="bi bi-geo-alt text-amber-500 mt-0.5"></i>
                     <span class="truncate">{{ res.display_name }}</span>
                   </div>
                 </div>
@@ -1041,11 +1219,11 @@ onUnmounted(() => {
             </div>
 
             <!-- Legend Marker Peta -->
-            <div class="flex flex-wrap items-center justify-between text-[11px] text-slate-400 px-1">
+            <div :class="['flex flex-wrap items-center justify-between text-[11px] px-1', isDark ? 'text-slate-400' : 'text-slate-600']">
               <div class="flex items-center gap-4">
                 <div class="flex items-center gap-1.5">
-                  <span class="w-3 h-3 rounded-full bg-amber-400 border border-slate-900 shadow-sm"></span>
-                  <span class="text-slate-300 font-medium">Gereja Anda (Dapat Digeser)</span>
+                  <span class="w-3 h-3 rounded-full bg-amber-400 border border-slate-900 shadow-xs"></span>
+                  <span :class="isDark ? 'text-slate-300 font-medium' : 'text-slate-800 font-semibold'">Gereja Anda (Dapat Digeser)</span>
                 </div>
                 <div class="flex items-center gap-1.5">
                   <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 border border-slate-900"></span>
@@ -1058,34 +1236,40 @@ onUnmounted(() => {
           </div>
 
           <!-- Kolom Kanan: Form Input Koordinat & Tombol Simpan ke Database (5 Kolom) -->
-          <div class="lg:col-span-5 space-y-4 bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 shadow-xl">
+          <div :class="['lg:col-span-5 space-y-4 rounded-2xl p-5 shadow-xl border transition-colors', isDark ? 'bg-slate-950/70 border-slate-800/90' : 'bg-slate-50/90 border-slate-200 shadow-slate-200/50']">
             
-            <div class="pb-3 border-b border-slate-800">
-              <h3 class="text-base font-bold font-serif text-white flex items-center gap-2">
-                <i class="bi bi-sliders text-amber-400"></i>
+            <div :class="['pb-3 border-b transition-colors', isDark ? 'border-slate-800' : 'border-slate-200']">
+              <h3 :class="['text-base font-bold font-serif flex items-center gap-2', isDark ? 'text-white' : 'text-slate-900']">
+                <i class="bi bi-sliders text-amber-500"></i>
                 <span>Parameter Koordinat & Alamat</span>
               </h3>
-              <p class="text-slate-400 text-xs mt-0.5">Nilai di bawah ini disinkronkan otomatis dengan pin di peta.</p>
+              <p :class="['text-xs mt-0.5', isDark ? 'text-slate-400' : 'text-slate-600']">Nilai di bawah ini disinkronkan otomatis dengan pin di peta.</p>
             </div>
 
             <!-- Nama Gereja & Kode Gereja (Read-only info) -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="text-[11px] text-slate-400 font-semibold block mb-1">Nama Gereja</label>
+                <label :class="['text-[11px] font-semibold block mb-1', isDark ? 'text-slate-400' : 'text-slate-600']">Nama Gereja</label>
                 <input 
                   type="text" 
                   :value="locationForm.church_name" 
                   disabled
-                  class="w-full bg-slate-900/60 border border-slate-800 text-slate-300 text-xs rounded-xl px-3 py-2 cursor-not-allowed font-medium"
+                  :class="[
+                    'w-full text-xs rounded-xl px-3 py-2 cursor-not-allowed font-medium border',
+                    isDark ? 'bg-slate-900/60 border-slate-800 text-slate-300' : 'bg-white border-slate-200 text-slate-700'
+                  ]"
                 />
               </div>
               <div>
-                <label class="text-[11px] text-slate-400 font-semibold block mb-1">Kode Gereja</label>
+                <label :class="['text-[11px] font-semibold block mb-1', isDark ? 'text-slate-400' : 'text-slate-600']">Kode Gereja</label>
                 <input 
                   type="text" 
                   :value="locationForm.church_code" 
                   disabled
-                  class="w-full bg-slate-900/60 border border-slate-800 text-amber-400 font-mono text-xs rounded-xl px-3 py-2 cursor-not-allowed font-bold"
+                  :class="[
+                    'w-full font-mono text-xs rounded-xl px-3 py-2 cursor-not-allowed font-bold border',
+                    isDark ? 'bg-slate-900/60 border-slate-800 text-amber-400' : 'bg-white border-slate-200 text-amber-800'
+                  ]"
                 />
               </div>
             </div>
@@ -1093,7 +1277,7 @@ onUnmounted(() => {
             <!-- Input Latitude & Longitude -->
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="text-[11px] text-amber-300 font-semibold block mb-1">
+                <label :class="['text-[11px] font-semibold block mb-1', isDark ? 'text-amber-300' : 'text-amber-800']">
                   Latitude (Lintang)
                 </label>
                 <input 
@@ -1101,12 +1285,17 @@ onUnmounted(() => {
                   @change="updateCoords(locationForm.latitude, locationForm.longitude, true)"
                   type="number" 
                   step="0.000001"
-                  class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 text-amber-300 font-mono text-xs rounded-xl px-3 py-2 outline-none transition"
+                  :class="[
+                    'w-full font-mono text-xs rounded-xl px-3 py-2 outline-none transition border',
+                    isDark 
+                      ? 'bg-slate-900 border-slate-700 focus:border-amber-400 text-amber-300' 
+                      : 'bg-white border-slate-300 focus:border-amber-500 text-amber-900 font-bold'
+                  ]"
                   placeholder="-6.182400"
                 />
               </div>
               <div>
-                <label class="text-[11px] text-amber-300 font-semibold block mb-1">
+                <label :class="['text-[11px] font-semibold block mb-1', isDark ? 'text-amber-300' : 'text-amber-800']">
                   Longitude (Bujur)
                 </label>
                 <input 
@@ -1114,7 +1303,12 @@ onUnmounted(() => {
                   @change="updateCoords(locationForm.latitude, locationForm.longitude, true)"
                   type="number" 
                   step="0.000001"
-                  class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 text-amber-300 font-mono text-xs rounded-xl px-3 py-2 outline-none transition"
+                  :class="[
+                    'w-full font-mono text-xs rounded-xl px-3 py-2 outline-none transition border',
+                    isDark 
+                      ? 'bg-slate-900 border-slate-700 focus:border-amber-400 text-amber-300' 
+                      : 'bg-white border-slate-300 focus:border-amber-500 text-amber-900 font-bold'
+                  ]"
                   placeholder="106.985600"
                 />
               </div>
@@ -1122,34 +1316,44 @@ onUnmounted(() => {
 
             <!-- Input Kota -->
             <div>
-              <label class="text-[11px] text-slate-300 font-semibold block mb-1">Kota / Wilayah</label>
+              <label :class="['text-[11px] font-semibold block mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Kota / Wilayah</label>
               <input 
                 v-model="locationForm.city" 
                 type="text" 
                 placeholder="Contoh: Surabaya, Jakarta Pusat, Medan..."
-                class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 text-slate-200 text-xs rounded-xl px-3 py-2 outline-none transition"
+                :class="[
+                  'w-full text-xs rounded-xl px-3 py-2 outline-none transition border',
+                  isDark 
+                    ? 'bg-slate-900 border-slate-700 focus:border-amber-400 text-slate-200' 
+                    : 'bg-white border-slate-300 focus:border-amber-500 text-slate-900'
+                ]"
               />
             </div>
 
             <!-- Input Alamat Lengkap Gereja -->
             <div>
-              <label class="text-[11px] text-slate-300 font-semibold block mb-1">Alamat Fisik Gedung Gereja</label>
+              <label :class="['text-[11px] font-semibold block mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Alamat Fisik Gedung Gereja</label>
               <textarea 
-                v-model="locationForm.address"
+                v-model="locationForm.address" 
                 rows="3"
                 placeholder="Jl. Nama Jalan No. XX, Kelurahan, Kecamatan..."
-                class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 text-slate-200 text-xs rounded-xl p-3 outline-none resize-none leading-relaxed transition"
+                :class="[
+                  'w-full text-xs rounded-xl p-3 outline-none resize-none leading-relaxed transition border',
+                  isDark 
+                    ? 'bg-slate-900 border-slate-700 focus:border-amber-400 text-slate-200' 
+                    : 'bg-white border-slate-300 focus:border-amber-500 text-slate-900'
+                ]"
               ></textarea>
             </div>
 
             <!-- Input / Output Google Maps URL -->
             <div>
               <div class="flex items-center justify-between mb-1">
-                <label class="text-[11px] text-slate-300 font-semibold">Tautan Google Maps (GMaps)</label>
+                <label :class="['text-[11px] font-semibold', isDark ? 'text-slate-300' : 'text-slate-700']">Tautan Google Maps (GMaps)</label>
                 <button 
                   type="button" 
                   @click="openGoogleMapsTest"
-                  class="text-[10px] text-sky-400 hover:text-sky-300 flex items-center gap-1 font-semibold cursor-pointer transition"
+                  :class="['text-[10px] flex items-center gap-1 font-semibold cursor-pointer transition', isDark ? 'text-sky-400 hover:text-sky-300' : 'text-sky-700 hover:text-sky-900']"
                   title="Buka link di tab baru untuk mengecek"
                 >
                   <i class="bi bi-box-arrow-up-right"></i>
@@ -1161,13 +1365,18 @@ onUnmounted(() => {
                   v-model="locationForm.google_maps_url" 
                   type="text" 
                   placeholder="https://www.google.com/maps/..."
-                  class="w-full bg-slate-900 border border-slate-700 focus:border-amber-400 text-sky-300 text-xs font-mono rounded-xl pl-3 pr-8 py-2 outline-none truncate transition"
+                  :class="[
+                    'w-full text-xs font-mono rounded-xl pl-3 pr-8 py-2 outline-none truncate transition border',
+                    isDark 
+                      ? 'bg-slate-900 border-slate-700 focus:border-amber-400 text-sky-300' 
+                      : 'bg-white border-slate-300 focus:border-amber-500 text-sky-800 font-bold'
+                  ]"
                 />
                 <button 
                   type="button" 
                   @click="locationForm.google_maps_url = generateGMapsUrl(locationForm.latitude, locationForm.longitude)"
                   title="Generate ulang URL otomatis dari koordinat"
-                  class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-amber-400 text-xs cursor-pointer transition"
+                  :class="['absolute right-2 top-1/2 -translate-y-1/2 text-xs cursor-pointer transition', isDark ? 'text-slate-400 hover:text-amber-400' : 'text-slate-500 hover:text-amber-600']"
                 >
                   <i class="bi bi-arrow-clockwise"></i>
                 </button>
@@ -1175,7 +1384,7 @@ onUnmounted(() => {
             </div>
 
             <!-- Action Buttons: Simpan ke Database -->
-            <div class="pt-3 border-t border-slate-800 flex flex-col gap-2">
+            <div :class="['pt-3 border-t flex flex-col gap-2 transition-colors', isDark ? 'border-slate-800' : 'border-slate-200']">
               <button 
                 type="button"
                 @click="saveLocationToDatabase"
@@ -1187,7 +1396,7 @@ onUnmounted(() => {
                 <span>{{ isSaving ? 'Menyimpan ke Database...' : 'Simpan Lokasi ke DBMS PostgreSQL' }}</span>
               </button>
 
-              <p class="text-[10px] text-slate-500 text-center">
+              <p :class="['text-[10px] text-center', isDark ? 'text-slate-500' : 'text-slate-500']">
                 Koordinat akan langsung diperbarui di PostgreSQL dan ditampilkan ke publik di Peta Beranda.
               </p>
             </div>
@@ -1201,16 +1410,16 @@ onUnmounted(() => {
       <!-- ======================================================== -->
       <!-- 5. SECTION DAFTAR SELURUH CABANG DENGAN GEOLOCATION      -->
       <!-- ======================================================== -->
-      <section class="bg-slate-900/60 border border-slate-800 rounded-3xl p-5 sm:p-7 space-y-4 shadow-xl">
+      <section :class="['rounded-3xl p-5 sm:p-7 space-y-4 shadow-xl border transition-colors', isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-white border-slate-200 shadow-slate-200/50']">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 class="text-lg font-serif font-bold text-white flex items-center gap-2">
+            <h3 :class="['text-lg font-serif font-bold flex items-center gap-2 transition-colors', isDark ? 'text-white' : 'text-slate-900']">
               <i class="bi bi-diagram-3 text-amber-400"></i>
               <span>Daftar Titik Gereja & Cabang Terhubung</span>
             </h3>
-            <p class="text-slate-400 text-xs">Seluruh titik cabang yang telah terdaftar di sistem DBMS GracePoint.</p>
+            <p :class="['text-xs transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">Seluruh titik cabang yang telah terdaftar di sistem DBMS GracePoint.</p>
           </div>
-          <span class="px-3.5 py-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 rounded-xl text-xs font-mono font-bold w-fit">
+          <span :class="['px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold w-fit border transition-colors', isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-300' : 'bg-amber-100 border-amber-300 text-amber-900']">
             Total: {{ allChurchAdmins.length }} Gereja Cabang
           </span>
         </div>
@@ -1219,24 +1428,26 @@ onUnmounted(() => {
           <div 
             v-for="adm in allChurchAdmins" 
             :key="adm.id"
-            :class="adm.id === selectedAdminId ? 'border-amber-400/90 bg-amber-500/10 shadow-lg shadow-amber-500/10 ring-1 ring-amber-400/30' : 'border-slate-800 bg-slate-950/70 hover:border-slate-700'"
+            :class="adm.id === selectedAdminId 
+              ? (isDark ? 'border-amber-400/90 bg-amber-500/10 shadow-lg shadow-amber-500/10 ring-1 ring-amber-400/30' : 'border-amber-500 bg-amber-50/80 shadow-md ring-1 ring-amber-400/40') 
+              : (isDark ? 'border-slate-800 bg-slate-950/70 hover:border-slate-700' : 'border-slate-200 bg-slate-50/70 hover:border-slate-300')"
             class="p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3"
           >
             <div>
               <div class="flex items-center justify-between gap-2 mb-1.5">
-                <span class="text-xs font-bold font-serif text-amber-300 truncate">{{ adm.church_name }}</span>
-                <span class="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 font-bold">{{ adm.church_code || 'CABANG' }}</span>
+                <span :class="['text-xs font-bold font-serif truncate', isDark ? 'text-amber-300' : 'text-amber-800']">{{ adm.church_name }}</span>
+                <span :class="['px-2 py-0.5 rounded text-[10px] font-mono font-bold', isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-700']">{{ adm.church_code || 'CABANG' }}</span>
               </div>
-              <p class="text-xs text-slate-400 line-clamp-2">
+              <p :class="['text-xs line-clamp-2', isDark ? 'text-slate-400' : 'text-slate-600']">
                 {{ adm.address || 'Alamat fisik belum didaftarkan' }}
               </p>
-              <div class="flex items-center gap-2 mt-2 text-[11px] text-slate-400">
+              <div :class="['flex items-center gap-2 mt-2 text-[11px]', isDark ? 'text-slate-400' : 'text-slate-600']">
                 <i class="bi bi-geo-alt text-amber-400"></i>
                 <span>{{ adm.city || 'Kota belum diset' }}</span>
               </div>
             </div>
 
-            <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs">
+            <div :class="['pt-3 border-t flex items-center justify-between text-xs transition-colors', isDark ? 'border-slate-800/80' : 'border-slate-200']">
               <div class="font-mono text-[10px] text-emerald-400 flex items-center gap-1" v-if="adm.latitude && adm.longitude">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
                 <span>{{ Number(adm.latitude).toFixed(4) }}, {{ Number(adm.longitude).toFixed(4) }}</span>
@@ -1246,7 +1457,7 @@ onUnmounted(() => {
               <button 
                 type="button"
                 @click="selectAdminChurch(adm)"
-                :class="adm.id === selectedAdminId ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-amber-500/15 text-amber-300 hover:bg-amber-500/25'"
+                :class="adm.id === selectedAdminId ? 'bg-amber-400 text-slate-950 font-bold' : (isDark ? 'bg-amber-500/15 text-amber-300 hover:bg-amber-500/25' : 'bg-amber-100 text-amber-900 hover:bg-amber-200')"
                 class="px-3 py-1.5 rounded-lg text-[11px] font-semibold transition cursor-pointer flex items-center gap-1"
               >
                 <span>{{ adm.id === selectedAdminId ? 'Sedang Aktif' : 'Pilih & Edit' }}</span>
@@ -1260,19 +1471,25 @@ onUnmounted(() => {
       <!-- ======================================================== -->
       <!-- 6. SECTION MANAJEMEN INFORMASI PELAYANAN CABANG GEREJA   -->
       <!-- ======================================================== -->
-      <section id="pelayanan-cabang" class="bg-slate-900/90 border border-amber-500/30 rounded-3xl p-5 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+      <section 
+        id="pelayanan-cabang" 
+        :class="[
+          'rounded-3xl p-5 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6 border transition-colors',
+          isDark ? 'bg-slate-900/90 border-amber-500/30' : 'bg-white border-amber-300/80 shadow-amber-500/5'
+        ]"
+      >
         
         <!-- Header Section -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+        <div :class="['flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b transition-colors', isDark ? 'border-slate-800' : 'border-slate-200']">
           <div>
-            <div class="flex items-center gap-2 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-1">
+            <div class="flex items-center gap-2 text-amber-500 text-xs font-semibold uppercase tracking-wider mb-1">
               <i class="bi bi-broadcast-pin"></i>
               <span>Publikasi Pelayanan Gereja Terintegrasi</span>
             </div>
-            <h2 class="text-xl sm:text-2xl font-bold font-serif text-white">
+            <h2 :class="['text-xl sm:text-2xl font-bold font-serif transition-colors', isDark ? 'text-white' : 'text-slate-900']">
               Manajemen Informasi & Pengumuman Pelayanan Cabang
             </h2>
-            <p class="text-slate-400 text-xs sm:text-sm mt-1">
+            <p :class="['text-xs sm:text-sm mt-1 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
               Terbitkan jadwal ibadah, persekutuan, konseling, dan kegiatan sosial cabang gereja Anda ke database PostgreSQL. Informasi ini otomatis tayang di portal publik <strong>Informasi Pelayanan</strong>.
             </p>
           </div>
@@ -1280,7 +1497,12 @@ onUnmounted(() => {
           <div class="flex flex-wrap items-center gap-3">
             <RouterLink 
               to="/informasi-pelayanan#pelayanan-cabang" 
-              class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition"
+              :class="[
+                'px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition border',
+                isDark
+                  ? 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-amber-500/30'
+                  : 'bg-slate-100 hover:bg-slate-200 text-amber-900 border-slate-300'
+              ]"
             >
               <i class="bi bi-box-arrow-up-right"></i>
               <span>Lihat Halaman Publik</span>
@@ -1302,11 +1524,11 @@ onUnmounted(() => {
           <button 
             type="button"
             @click="selectedCategoryFilter = 'Semua'"
-            :class="selectedCategoryFilter === 'Semua' ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'"
+            :class="selectedCategoryFilter === 'Semua' ? 'bg-amber-400 text-slate-950 font-bold' : (isDark ? 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-300')"
             class="px-3.5 py-1.5 rounded-xl text-xs whitespace-nowrap transition cursor-pointer flex items-center gap-1.5"
           >
             <span>Semua Pelayanan</span>
-            <span class="px-1.5 py-0.2 rounded-full text-[10px]" :class="selectedCategoryFilter === 'Semua' ? 'bg-slate-900 text-amber-300' : 'bg-slate-800 text-slate-400'">
+            <span class="px-1.5 py-0.2 rounded-full text-[10px]" :class="selectedCategoryFilter === 'Semua' ? 'bg-slate-900 text-amber-300' : (isDark ? 'bg-slate-800 text-slate-400' : 'bg-slate-200 text-slate-700')">
               {{ branchServices.length }}
             </span>
           </button>
@@ -1316,7 +1538,7 @@ onUnmounted(() => {
             :key="cat"
             type="button"
             @click="selectedCategoryFilter = cat"
-            :class="selectedCategoryFilter === cat ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800'"
+            :class="selectedCategoryFilter === cat ? 'bg-amber-400 text-slate-950 font-bold' : (isDark ? 'bg-slate-950 text-slate-400 hover:text-slate-200 border border-slate-800' : 'bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-300')"
             class="px-3.5 py-1.5 rounded-xl text-xs whitespace-nowrap transition cursor-pointer flex items-center gap-1.5"
           >
             <span>{{ cat }}</span>
@@ -1324,8 +1546,8 @@ onUnmounted(() => {
         </div>
 
         <!-- Feedback Alert Messages -->
-        <div v-if="serviceSuccessMsg" class="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs sm:text-sm flex items-start gap-3 animate-scaleUp">
-          <i class="bi bi-check-circle-fill text-emerald-400 text-base flex-shrink-0 mt-0.5"></i>
+        <div v-if="serviceSuccessMsg" class="p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs sm:text-sm flex items-start gap-3 animate-scaleUp">
+          <i class="bi bi-check-circle-fill text-emerald-500 text-base flex-shrink-0 mt-0.5"></i>
           <div>
             <strong class="font-serif">Berhasil!</strong>
             <p class="mt-0.5">{{ serviceSuccessMsg }}</p>
@@ -1335,18 +1557,24 @@ onUnmounted(() => {
         <!-- Loading State -->
         <div v-if="isBranchServicesLoading" class="text-center py-12">
           <div class="w-9 h-9 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-          <p class="text-xs text-slate-400">Memuat data pelayanan cabang dari database...</p>
+          <p :class="['text-xs', isDark ? 'text-slate-400' : 'text-slate-600']">Memuat data pelayanan cabang dari database...</p>
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="filteredBranchServices.length === 0" class="text-center py-12 px-4 bg-slate-950/60 rounded-2xl border border-dashed border-amber-500/25 space-y-3">
-          <div class="w-14 h-14 rounded-full bg-slate-900 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto text-2xl shadow-inner">
+        <div 
+          v-else-if="filteredBranchServices.length === 0" 
+          :class="[
+            'text-center py-12 px-4 rounded-2xl border border-dashed space-y-3 transition-colors',
+            isDark ? 'bg-slate-950/60 border-amber-500/25' : 'bg-slate-50 border-amber-300/60'
+          ]"
+        >
+          <div :class="['w-14 h-14 rounded-full border flex items-center justify-center mx-auto text-2xl shadow-inner', isDark ? 'bg-slate-900 border-amber-500/30 text-amber-400' : 'bg-white border-amber-300 text-amber-800']">
             <i class="bi bi-calendar-plus"></i>
           </div>
-          <h4 class="font-serif text-base sm:text-lg font-bold text-white">
+          <h4 :class="['font-serif text-base sm:text-lg font-bold', isDark ? 'text-white' : 'text-slate-900']">
             {{ selectedCategoryFilter === 'Semua' ? 'Belum Ada Informasi Pelayanan yang Diterbitkan' : `Belum Ada Jadwal untuk Kategori "${selectedCategoryFilter}"` }}
           </h4>
-          <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
+          <p :class="['text-xs max-w-md mx-auto leading-relaxed', isDark ? 'text-slate-400' : 'text-slate-600']">
             Gereja cabang ini belum memiliki jadwal atau pengumuman pelayanan aktif. Klik tombol di bawah untuk menerbitkan jadwal ibadah atau program pelayanan cabang Anda.
           </p>
           <button 
@@ -1364,56 +1592,68 @@ onUnmounted(() => {
           <div 
             v-for="svc in filteredBranchServices" 
             :key="svc.id"
-            class="bg-slate-950/90 border border-amber-500/25 hover:border-amber-400/60 rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xl transition-all duration-300 hover:-translate-y-1"
+            :class="[
+              'rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xl transition-all duration-300 hover:-translate-y-1 border',
+              isDark 
+                ? 'bg-slate-950/90 border-amber-500/25 hover:border-amber-400/60' 
+                : 'bg-slate-50/80 border-slate-200 hover:border-amber-400 shadow-slate-200/50'
+            ]"
           >
             <div class="space-y-3">
               <div class="flex items-center justify-between gap-2">
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                <span :class="['px-2.5 py-0.5 rounded-full text-[10px] font-bold border', isDark ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' : 'bg-amber-100 text-amber-900 border-amber-300']">
                   {{ svc.category }}
                 </span>
                 <span 
-                  :class="svc.status === 'Aktif' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-slate-800 text-slate-300 border-slate-700'"
+                  :class="svc.status === 'Aktif' 
+                    ? (isDark ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-emerald-100 text-emerald-900 border-emerald-300') 
+                    : (isDark ? 'bg-slate-800 text-slate-300 border-slate-700' : 'bg-slate-200 text-slate-700 border-slate-300')"
                   class="text-[10px] px-2.5 py-0.5 rounded-full border font-semibold"
                 >
                   {{ svc.status || 'Aktif' }}
                 </span>
               </div>
 
-              <h4 class="font-serif font-bold text-white text-base leading-snug">{{ svc.service_name }}</h4>
+              <h4 :class="['font-serif font-bold text-base leading-snug', isDark ? 'text-white' : 'text-slate-900']">{{ svc.service_name }}</h4>
               
-              <div class="text-xs text-slate-300 space-y-1.5 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                <p class="text-amber-300 flex items-center gap-2 font-medium">
-                  <i class="bi bi-clock text-amber-400"></i>
+              <div :class="['text-xs space-y-1.5 p-3 rounded-xl border', isDark ? 'bg-slate-900/60 border-slate-800 text-slate-300' : 'bg-white border-slate-200 text-slate-700']">
+                <p :class="['flex items-center gap-2 font-medium', isDark ? 'text-amber-300' : 'text-amber-800 font-semibold']">
+                  <i class="bi bi-clock text-amber-500"></i>
                   <span>{{ svc.schedule_day || 'Minggu' }} • {{ svc.schedule_time || 'Reguler' }}</span>
                 </p>
-                <p v-if="svc.location_room" class="text-slate-400 flex items-center gap-2 text-[11px]">
-                  <i class="bi bi-geo-alt text-amber-400"></i>
+                <p v-if="svc.location_room" :class="['flex items-center gap-2 text-[11px]', isDark ? 'text-slate-400' : 'text-slate-600']">
+                  <i class="bi bi-geo-alt text-amber-500"></i>
                   <span>{{ svc.location_room }}</span>
                 </p>
-                <p v-if="svc.pic_name" class="text-slate-400 flex items-center gap-2 text-[11px]">
-                  <i class="bi bi-person text-amber-400"></i>
+                <p v-if="svc.pic_name" :class="['flex items-center gap-2 text-[11px]', isDark ? 'text-slate-400' : 'text-slate-600']">
+                  <i class="bi bi-person text-amber-500"></i>
                   <span>PIC: {{ svc.pic_name }}</span>
                   <a 
                     v-if="svc.pic_contact" 
                     :href="`https://wa.me/${svc.pic_contact.replace(/\D/g, '')}`" 
                     target="_blank"
-                    class="text-emerald-400 hover:underline font-mono text-[10px] flex items-center gap-0.5 ml-1"
+                    class="text-emerald-500 hover:underline font-mono text-[10px] flex items-center gap-0.5 ml-1"
                   >
                     <i class="bi bi-whatsapp"></i> WA
                   </a>
                 </p>
               </div>
 
-              <p v-if="svc.description" class="text-xs text-slate-400 line-clamp-3 leading-relaxed">
+              <p v-if="svc.description" :class="['text-xs line-clamp-3 leading-relaxed', isDark ? 'text-slate-400' : 'text-slate-600']">
                 {{ svc.description }}
               </p>
             </div>
 
-            <div class="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
+            <div :class="['pt-3 border-t flex items-center justify-end gap-2 transition-colors', isDark ? 'border-slate-800' : 'border-slate-200']">
               <button 
                 type="button"
                 @click="openEditServiceModal(svc)"
-                class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold border border-amber-500/30 transition flex items-center gap-1.5 cursor-pointer"
+                :class="[
+                  'px-3 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 cursor-pointer',
+                  isDark
+                    ? 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-amber-500/30'
+                    : 'bg-white hover:bg-slate-100 text-amber-900 border-slate-300 shadow-xs'
+                ]"
               >
                 <i class="bi bi-pencil"></i>
                 <span>Edit</span>
@@ -1421,7 +1661,12 @@ onUnmounted(() => {
               <button 
                 type="button"
                 @click="deleteServiceFromDatabase(svc)"
-                class="px-3 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-xs font-semibold border border-rose-500/30 transition flex items-center gap-1.5 cursor-pointer"
+                :class="[
+                  'px-3 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 cursor-pointer',
+                  isDark
+                    ? 'bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border-rose-500/30'
+                    : 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-300'
+                ]"
               >
                 <i class="bi bi-trash"></i>
                 <span>Hapus</span>
@@ -1441,20 +1686,20 @@ onUnmounted(() => {
           class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
           @click.self="isServiceModalOpen = false"
         >
-          <div class="bg-slate-900 border border-amber-500/40 w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col font-sans animate-scaleUp">
+          <div :class="['w-full max-w-xl rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[90vh] flex flex-col font-sans animate-scaleUp border transition-colors', isDark ? 'bg-slate-900 border-amber-500/40 text-white' : 'bg-white border-amber-300 text-slate-900']">
             
             <!-- Modal Header -->
-            <div class="p-5 sm:p-6 bg-slate-950 border-b border-amber-500/30 flex items-center justify-between">
+            <div :class="['p-5 sm:p-6 border-b flex items-center justify-between transition-colors', isDark ? 'bg-slate-950 border-amber-500/30' : 'bg-amber-50/80 border-amber-200']">
               <div>
-                <h3 class="font-serif text-lg font-bold text-amber-300">
+                <h3 :class="['font-serif text-lg font-bold', isDark ? 'text-amber-300' : 'text-amber-800']">
                   {{ editingServiceId ? 'Edit Informasi Pelayanan Cabang' : 'Terbitkan Informasi Pelayanan Baru' }}
                 </h3>
-                <p class="text-xs text-slate-400 mt-0.5">Gereja: {{ locationForm.church_name }} ({{ locationForm.city || 'Cabang' }})</p>
+                <p :class="['text-xs mt-0.5', isDark ? 'text-slate-400' : 'text-slate-600']">Gereja: {{ locationForm.church_name }} ({{ locationForm.city || 'Cabang' }})</p>
               </div>
               <button 
                 type="button"
                 @click="isServiceModalOpen = false"
-                class="w-8 h-8 rounded-full bg-slate-900 text-slate-400 hover:text-white border border-amber-500/30 flex items-center justify-center transition cursor-pointer"
+                :class="['w-8 h-8 rounded-full border flex items-center justify-center transition cursor-pointer', isDark ? 'bg-slate-900 text-slate-400 hover:text-white border-amber-500/30' : 'bg-white text-slate-500 hover:text-slate-800 border-slate-300']"
               >
                 <i class="bi bi-x-lg"></i>
               </button>
@@ -1462,38 +1707,53 @@ onUnmounted(() => {
 
             <!-- Modal Form Body -->
             <div class="p-6 overflow-y-auto space-y-4 text-xs">
-              <div v-if="serviceErrorMsg" class="p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-300">
+              <div v-if="serviceErrorMsg" class="p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-400">
                 {{ serviceErrorMsg }}
               </div>
 
               <!-- Nama Pelayanan -->
               <div>
-                <label class="block text-slate-300 font-semibold mb-1">Nama Ibadah / Pelayanan: *</label>
+                <label :class="['block font-semibold mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Nama Ibadah / Pelayanan: *</label>
                 <input 
                   v-model="serviceForm.service_name"
                   type="text" 
                   placeholder="Contoh: Ibadah Raya 1, Persekutuan Doa Fajar, Youth Revival"
-                  class="w-full bg-slate-950 border border-amber-500/30 text-white rounded-xl px-3.5 py-2.5 focus:border-amber-400 outline-none transition"
+                  :class="[
+                    'w-full rounded-xl px-3.5 py-2.5 outline-none transition border',
+                    isDark
+                      ? 'bg-slate-950 border-amber-500/30 text-white focus:border-amber-400'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                  ]"
                 />
               </div>
 
               <!-- Kategori & Status -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-slate-300 font-semibold mb-1">Kategori: *</label>
+                  <label :class="['block font-semibold mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Kategori: *</label>
                   <select 
                     v-model="serviceForm.category"
-                    class="w-full bg-slate-950 border border-amber-500/30 text-white rounded-xl px-3.5 py-2.5 focus:border-amber-400 outline-none transition cursor-pointer"
+                    :class="[
+                      'w-full rounded-xl px-3.5 py-2.5 outline-none transition cursor-pointer border',
+                      isDark
+                        ? 'bg-slate-950 border-amber-500/30 text-white focus:border-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                    ]"
                   >
                     <option v-for="c in serviceCategories" :key="c" :value="c">{{ c }}</option>
                   </select>
                 </div>
 
                 <div>
-                  <label class="block text-slate-300 font-semibold mb-1">Status Pelayanan:</label>
+                  <label :class="['block font-semibold mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Status Pelayanan:</label>
                   <select 
                     v-model="serviceForm.status"
-                    class="w-full bg-slate-950 border border-amber-500/30 text-white rounded-xl px-3.5 py-2.5 focus:border-amber-400 outline-none transition cursor-pointer"
+                    :class="[
+                      'w-full rounded-xl px-3.5 py-2.5 outline-none transition cursor-pointer border',
+                      isDark
+                        ? 'bg-slate-950 border-amber-500/30 text-white focus:border-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                    ]"
                   >
                     <option value="Aktif">Aktif</option>
                     <option value="Akan Datang">Akan Datang</option>
@@ -1505,22 +1765,32 @@ onUnmounted(() => {
               <!-- Hari & Jam Pelaksanaan -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-slate-300 font-semibold mb-1">Hari Pelaksanaan:</label>
+                  <label :class="['block font-semibold mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Hari Pelaksanaan:</label>
                   <input 
                     v-model="serviceForm.schedule_day"
                     type="text" 
                     placeholder="Contoh: Setiap Hari Minggu / Jumat Malam"
-                    class="w-full bg-slate-950 border border-amber-500/30 text-white rounded-xl px-3.5 py-2.5 focus:border-amber-400 outline-none transition"
+                    :class="[
+                      'w-full rounded-xl px-3.5 py-2.5 outline-none transition border',
+                      isDark
+                        ? 'bg-slate-950 border-amber-500/30 text-white focus:border-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                    ]"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-slate-300 font-semibold mb-1">Jam Pelaksanaan:</label>
+                  <label :class="['block font-semibold mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Jam Pelaksanaan:</label>
                   <input 
                     v-model="serviceForm.schedule_time"
                     type="text" 
                     placeholder="Contoh: 09:00 - 11:00 WIB"
-                    class="w-full bg-slate-950 border border-amber-500/30 text-white rounded-xl px-3.5 py-2.5 focus:border-amber-400 outline-none transition"
+                    :class="[
+                      'w-full rounded-xl px-3.5 py-2.5 outline-none transition border',
+                      isDark
+                        ? 'bg-slate-950 border-amber-500/30 text-white focus:border-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                    ]"
                   />
                 </div>
               </div>
@@ -1528,22 +1798,32 @@ onUnmounted(() => {
               <!-- Ruang & Target -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-slate-300 font-semibold mb-1">Ruangan / Tempat:</label>
+                  <label :class="['block font-semibold mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Ruangan / Tempat:</label>
                   <input 
                     v-model="serviceForm.location_room"
                     type="text" 
                     placeholder="Contoh: Main Sanctuary Lt. 1 / Ruang Serbaguna"
-                    class="w-full bg-slate-950 border border-amber-500/30 text-white rounded-xl px-3.5 py-2.5 focus:border-amber-400 outline-none transition"
+                    :class="[
+                      'w-full rounded-xl px-3.5 py-2.5 outline-none transition border',
+                      isDark
+                        ? 'bg-slate-950 border-amber-500/30 text-white focus:border-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                    ]"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-slate-300 font-semibold mb-1">Target Jemaat:</label>
+                  <label :class="['block font-semibold mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Target Jemaat:</label>
                   <input 
                     v-model="serviceForm.target_audience"
                     type="text" 
                     placeholder="Contoh: Semua Jemaat / Pemuda & Remaja"
-                    class="w-full bg-slate-950 border border-amber-500/30 text-white rounded-xl px-3.5 py-2.5 focus:border-amber-400 outline-none transition"
+                    :class="[
+                      'w-full rounded-xl px-3.5 py-2.5 outline-none transition border',
+                      isDark
+                        ? 'bg-slate-950 border-amber-500/30 text-white focus:border-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                    ]"
                   />
                 </div>
               </div>
@@ -1551,55 +1831,75 @@ onUnmounted(() => {
               <!-- PIC & Kontak WA -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label class="block text-slate-300 font-semibold mb-1">Nama PIC / Pelayan:</label>
+                  <label :class="['block font-semibold mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Nama PIC / Pelayan:</label>
                   <input 
                     v-model="serviceForm.pic_name"
                     type="text" 
                     placeholder="Contoh: Pdt. Andreas / Sdr. Kevin"
-                    class="w-full bg-slate-950 border border-amber-500/30 text-white rounded-xl px-3.5 py-2.5 focus:border-amber-400 outline-none transition"
+                    :class="[
+                      'w-full rounded-xl px-3.5 py-2.5 outline-none transition border',
+                      isDark
+                        ? 'bg-slate-950 border-amber-500/30 text-white focus:border-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                    ]"
                   />
                 </div>
 
                 <div>
-                  <label class="block text-slate-300 font-semibold mb-1">Nomor WhatsApp PIC:</label>
+                  <label :class="['block font-semibold mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Nomor WhatsApp PIC:</label>
                   <input 
                     v-model="serviceForm.pic_contact"
                     type="text" 
                     placeholder="Contoh: 081234567890"
-                    class="w-full bg-slate-950 border border-amber-500/30 text-white rounded-xl px-3.5 py-2.5 focus:border-amber-400 outline-none transition"
+                    :class="[
+                      'w-full rounded-xl px-3.5 py-2.5 outline-none transition border',
+                      isDark
+                        ? 'bg-slate-950 border-amber-500/30 text-white focus:border-amber-400'
+                        : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                    ]"
                   />
                 </div>
               </div>
 
               <!-- Link Live Streaming -->
               <div>
-                <label class="block text-slate-300 font-semibold mb-1">Link Live Streaming / Zoom (Opsional):</label>
+                <label :class="['block font-semibold mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Link Live Streaming / Zoom (Opsional):</label>
                 <input 
                   v-model="serviceForm.live_stream_url"
                   type="text" 
                   placeholder="https://youtube.com/..."
-                  class="w-full bg-slate-950 border border-amber-500/30 text-white rounded-xl px-3.5 py-2.5 focus:border-amber-400 outline-none transition"
+                  :class="[
+                    'w-full rounded-xl px-3.5 py-2.5 outline-none transition border',
+                    isDark
+                      ? 'bg-slate-950 border-amber-500/30 text-white focus:border-amber-400'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                  ]"
                 />
               </div>
 
               <!-- Deskripsi -->
               <div>
-                <label class="block text-slate-300 font-semibold mb-1">Deskripsi & Keterangan Pelayanan:</label>
+                <label :class="['block font-semibold mb-1', isDark ? 'text-slate-300' : 'text-slate-700']">Deskripsi & Keterangan Pelayanan:</label>
                 <textarea 
                   v-model="serviceForm.description"
                   rows="3"
                   placeholder="Uraikan informasi mengenai tata ibadah, tema bulanan, atau panduan kehadiran..."
-                  class="w-full bg-slate-950 border border-amber-500/30 text-white rounded-xl px-3.5 py-2.5 focus:border-amber-400 outline-none resize-none transition"
+                  :class="[
+                    'w-full rounded-xl px-3.5 py-2.5 outline-none resize-none transition border',
+                    isDark
+                      ? 'bg-slate-950 border-amber-500/30 text-white focus:border-amber-400'
+                      : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500'
+                  ]"
                 ></textarea>
               </div>
             </div>
 
             <!-- Modal Footer -->
-            <div class="p-4 bg-slate-950 border-t border-amber-500/30 flex items-center justify-end gap-2.5">
+            <div :class="['p-4 border-t flex items-center justify-end gap-2.5 transition-colors', isDark ? 'bg-slate-950 border-amber-500/30' : 'bg-slate-50 border-slate-200']">
               <button 
                 type="button"
                 @click="isServiceModalOpen = false"
-                class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition cursor-pointer"
+                :class="['px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer border', isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-transparent' : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-300 shadow-xs']"
               >
                 Batal
               </button>
@@ -1631,6 +1931,11 @@ onUnmounted(() => {
   position: relative;
 }
 
+.admin-hero-card-light {
+  background: linear-gradient(135deg, #ffffff 0%, #fefce8 35%, #fffbeb 75%, #fef3c7 100%);
+  position: relative;
+}
+
 .hero-bg-texture {
   position: absolute;
   inset: 0;
@@ -1649,9 +1954,21 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
+:global(html[data-theme="light"]) .hero-overlay-glow,
+:global(html.theme-light) .hero-overlay-glow,
+:global(html.light) .hero-overlay-glow {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(254, 243, 199, 0.35) 100%) !important;
+}
+
 .hero-cinzel-title {
   font-family: 'Cinzel', serif;
   text-shadow: 0 4px 18px rgba(245, 158, 11, 0.3);
+}
+
+:global(html[data-theme="light"]) .hero-cinzel-title,
+:global(html.theme-light) .hero-cinzel-title,
+:global(html.light) .hero-cinzel-title {
+  text-shadow: 0 2px 10px rgba(217, 119, 6, 0.2) !important;
 }
 
 /* --- Stat Card Styling (HomeView Design Pattern) --- */
@@ -1674,6 +1991,21 @@ onUnmounted(() => {
   box-shadow: 0 16px 30px -8px rgba(0, 0, 0, 0.55), 0 0 20px rgba(245, 158, 11, 0.15);
 }
 
+:global(html[data-theme="light"]) .stat-card,
+:global(html.theme-light) .stat-card,
+:global(html.light) .stat-card {
+  background: linear-gradient(145deg, #ffffff, #f8fafc) !important;
+  border: 1px solid rgba(217, 119, 6, 0.25) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06) !important;
+}
+
+:global(html[data-theme="light"]) .stat-card:hover,
+:global(html.theme-light) .stat-card:hover,
+:global(html.light) .stat-card:hover {
+  border-color: rgba(217, 119, 6, 0.5) !important;
+  box-shadow: 0 10px 25px -5px rgba(217, 119, 6, 0.12), 0 0 15px rgba(217, 119, 6, 0.1) !important;
+}
+
 /* --- Showcase Cards Styling (HomeView Design Pattern) --- */
 .showcase-card {
   background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(28, 43, 94, 0.55));
@@ -1691,6 +2023,21 @@ onUnmounted(() => {
   transform: translateY(-5px);
   border-color: rgba(251, 191, 36, 0.5);
   box-shadow: 0 18px 32px -8px rgba(0, 0, 0, 0.5), 0 0 22px rgba(245, 158, 11, 0.18);
+}
+
+:global(html[data-theme="light"]) .showcase-card,
+:global(html.theme-light) .showcase-card,
+:global(html.light) .showcase-card {
+  background: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06) !important;
+}
+
+:global(html[data-theme="light"]) .showcase-card:hover,
+:global(html.theme-light) .showcase-card:hover,
+:global(html.light) .showcase-card:hover {
+  border-color: rgba(217, 119, 6, 0.45) !important;
+  box-shadow: 0 12px 28px -6px rgba(217, 119, 6, 0.15) !important;
 }
 
 .showcase-card-img-wrapper {
@@ -1749,12 +2096,24 @@ onUnmounted(() => {
   line-height: 1.35;
 }
 
+:global(html[data-theme="light"]) .showcase-card-title,
+:global(html.theme-light) .showcase-card-title,
+:global(html.light) .showcase-card-title {
+  color: #0f172a !important;
+}
+
 .showcase-card-desc {
   font-family: 'Lato', sans-serif;
   font-size: 0.825rem;
   color: #94a3b8;
   line-height: 1.55;
   margin: 0;
+}
+
+:global(html[data-theme="light"]) .showcase-card-desc,
+:global(html.theme-light) .showcase-card-desc,
+:global(html.light) .showcase-card-desc {
+  color: #475569 !important;
 }
 
 /* Animations */

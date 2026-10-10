@@ -2,8 +2,11 @@
 import { ref, computed, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import MainAdminLayout from '@/layouts/MainAdminLayout.vue'
 import { APP_CONFIG } from '@/config'
+import { useTheme } from '@/composables/useTheme'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+
+const { isDark } = useTheme()
 
 // --- State Data Admin Cabang dari PostgreSQL (tabel church_admins) ---
 const admins = ref([])
@@ -589,38 +592,38 @@ const formatDate = (dateStr) => {
     <!-- Modal Form Tambah/Edit Admin Cabang -->
     <Teleport to="body">
       <div v-if="isModalOpen" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md">
-        <div class="w-full max-w-3xl max-h-[94vh] overflow-y-auto bg-[#091129] border border-amber-500/40 rounded-2xl p-6 shadow-2xl relative font-sans text-slate-100">
+        <div :class="['w-full max-w-3xl max-h-[94vh] overflow-y-auto rounded-2xl p-6 shadow-2xl relative font-sans transition-colors border', isDark ? 'bg-[#091129] border-amber-500/40 text-slate-100' : 'bg-white border-amber-300/80 text-slate-900']">
           <button 
             @click="isModalOpen = false" 
-            class="absolute top-4 right-4 text-slate-400 hover:text-amber-300 p-1.5 rounded-lg border border-slate-700 hover:bg-[#0b1435] transition cursor-pointer"
+            :class="['absolute top-4 right-4 p-1.5 rounded-lg border transition cursor-pointer', isDark ? 'text-slate-400 hover:text-amber-300 border-slate-700 hover:bg-[#0b1435]' : 'text-slate-500 hover:text-amber-700 border-slate-200 hover:bg-amber-50']"
           >
             <i class="bi bi-x-lg"></i>
           </button>
 
-          <h3 class="text-xl font-bold font-serif text-amber-300 mb-4 border-b border-amber-500/20 pb-3">
+          <h3 :class="['text-xl font-bold font-serif mb-4 border-b pb-3 transition-colors', isDark ? 'text-amber-300 border-amber-500/20' : 'text-amber-900 border-amber-200']">
             {{ isEditing ? 'Edit Data Admin Cabang (PostgreSQL)' : 'Tambah Admin Cabang Baru (PostgreSQL)' }}
           </h3>
 
           <form @submit.prevent="saveAdmin" class="space-y-4 text-xs">
             <div>
-              <label class="block font-serif uppercase tracking-wider text-slate-300 mb-1 font-semibold">Nama Lengkap Admin *</label>
-              <input v-model="form.admin_name" type="text" required placeholder="Pdt. / Bp. / Ibu Nama Lengkap" class="w-full px-3.5 py-2.5 bg-[#050918] border border-amber-500/30 rounded-xl text-white focus:outline-none focus:border-amber-400">
+              <label :class="['block font-serif uppercase tracking-wider mb-1 font-semibold transition-colors', isDark ? 'text-slate-300' : 'text-slate-700']">Nama Lengkap Admin *</label>
+              <input v-model="form.admin_name" type="text" required placeholder="Pdt. / Bp. / Ibu Nama Lengkap" :class="['w-full px-3.5 py-2.5 rounded-xl transition border focus:outline-none', isDark ? 'bg-[#050918] border-amber-500/30 text-white focus:border-amber-400' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500']">
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-serif uppercase tracking-wider text-slate-300 mb-1 font-semibold">Email Login *</label>
-                <input v-model="form.email" type="email" required placeholder="admin@gereja.org" class="w-full px-3.5 py-2.5 bg-[#050918] border border-amber-500/30 rounded-xl text-white focus:outline-none focus:border-amber-400">
+                <label :class="['block font-serif uppercase tracking-wider mb-1 font-semibold transition-colors', isDark ? 'text-slate-300' : 'text-slate-700']">Email Login *</label>
+                <input v-model="form.email" type="email" required placeholder="admin@gereja.org" :class="['w-full px-3.5 py-2.5 rounded-xl transition border focus:outline-none', isDark ? 'bg-[#050918] border-amber-500/30 text-white focus:border-amber-400' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500']">
               </div>
               <div>
-                <label class="block font-serif uppercase tracking-wider text-slate-300 mb-1 font-semibold">No. HP / WhatsApp</label>
-                <input v-model="form.phone" type="text" placeholder="0812-xxxx-xxxx" class="w-full px-3.5 py-2.5 bg-[#050918] border border-amber-500/30 rounded-xl text-white focus:outline-none focus:border-amber-400">
+                <label :class="['block font-serif uppercase tracking-wider mb-1 font-semibold transition-colors', isDark ? 'text-slate-300' : 'text-slate-700']">No. HP / WhatsApp</label>
+                <input v-model="form.phone" type="text" placeholder="0812-xxxx-xxxx" :class="['w-full px-3.5 py-2.5 rounded-xl transition border focus:outline-none', isDark ? 'bg-[#050918] border-amber-500/30 text-white focus:border-amber-400' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500']">
               </div>
             </div>
 
             <div v-if="!isEditing && churches.length > 0">
-              <label class="block font-serif uppercase tracking-wider text-slate-300 mb-1 font-semibold">Pilih Gereja Induk Terafiliasi</label>
-              <select @change="onSelectChurch" class="w-full px-3.5 py-2.5 bg-[#050918] border border-amber-500/30 rounded-xl text-white focus:outline-none focus:border-amber-400 cursor-pointer">
+              <label :class="['block font-serif uppercase tracking-wider mb-1 font-semibold transition-colors', isDark ? 'text-slate-300' : 'text-slate-700']">Pilih Gereja Induk Terafiliasi</label>
+              <select @change="onSelectChurch" :class="['w-full px-3.5 py-2.5 rounded-xl transition border focus:outline-none cursor-pointer', isDark ? 'bg-[#050918] border-amber-500/30 text-white focus:border-amber-400' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500']">
                 <option value="">-- Pilih Gereja dari Database (Opsional) --</option>
                 <option v-for="c in churches" :key="c.id" :value="c.id">
                   {{ c.church_name }} (Kode: {{ c.church_code }})
@@ -630,23 +633,23 @@ const formatDate = (dateStr) => {
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-serif uppercase tracking-wider text-slate-300 mb-1 font-semibold">Nama Gereja Cabang *</label>
-                <input v-model="form.church_name" type="text" required placeholder="Contoh: GKI Harapan Indah" class="w-full px-3.5 py-2.5 bg-[#050918] border border-amber-500/30 rounded-xl text-white focus:outline-none focus:border-amber-400">
+                <label :class="['block font-serif uppercase tracking-wider mb-1 font-semibold transition-colors', isDark ? 'text-slate-300' : 'text-slate-700']">Nama Gereja Cabang *</label>
+                <input v-model="form.church_name" type="text" required placeholder="Contoh: GKI Harapan Indah" :class="['w-full px-3.5 py-2.5 rounded-xl transition border focus:outline-none', isDark ? 'bg-[#050918] border-amber-500/30 text-white focus:border-amber-400' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500']">
               </div>
               <div>
-                <label class="block font-serif uppercase tracking-wider text-slate-300 mb-1 font-semibold">Kode Gereja Cabang *</label>
-                <input v-model="form.church_code" type="text" required placeholder="GKI-HARAPAN-01" class="w-full px-3.5 py-2.5 bg-[#050918] border border-amber-500/30 rounded-xl text-white font-mono focus:outline-none focus:border-amber-400 uppercase">
+                <label :class="['block font-serif uppercase tracking-wider mb-1 font-semibold transition-colors', isDark ? 'text-slate-300' : 'text-slate-700']">Kode Gereja Cabang *</label>
+                <input v-model="form.church_code" type="text" required placeholder="GKI-HARAPAN-01" :class="['w-full px-3.5 py-2.5 rounded-xl font-mono uppercase transition border focus:outline-none', isDark ? 'bg-[#050918] border-amber-500/30 text-white focus:border-amber-400' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500']">
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-serif uppercase tracking-wider text-slate-300 mb-1 font-semibold">Kota / Wilayah</label>
-                <input v-model="form.city" type="text" placeholder="Contoh: Bekasi" class="w-full px-3.5 py-2.5 bg-[#050918] border border-amber-500/30 rounded-xl text-white focus:outline-none focus:border-amber-400">
+                <label :class="['block font-serif uppercase tracking-wider mb-1 font-semibold transition-colors', isDark ? 'text-slate-300' : 'text-slate-700']">Kota / Wilayah</label>
+                <input v-model="form.city" type="text" placeholder="Contoh: Bekasi" :class="['w-full px-3.5 py-2.5 rounded-xl transition border focus:outline-none', isDark ? 'bg-[#050918] border-amber-500/30 text-white focus:border-amber-400' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500']">
               </div>
               <div>
-                <label class="block font-serif uppercase tracking-wider text-slate-300 mb-1 font-semibold">Status Akun</label>
-                <select v-model="form.status" class="w-full px-3.5 py-2.5 bg-[#050918] border border-amber-500/30 rounded-xl text-white focus:outline-none focus:border-amber-400">
+                <label :class="['block font-serif uppercase tracking-wider mb-1 font-semibold transition-colors', isDark ? 'text-slate-300' : 'text-slate-700']">Status Akun</label>
+                <select v-model="form.status" :class="['w-full px-3.5 py-2.5 rounded-xl transition border focus:outline-none cursor-pointer', isDark ? 'bg-[#050918] border-amber-500/30 text-white focus:border-amber-400' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500']">
                   <option value="Aktif">Aktif</option>
                   <option value="Pending">Pending</option>
                   <option value="Nonaktif">Nonaktif</option>
@@ -655,60 +658,65 @@ const formatDate = (dateStr) => {
             </div>
 
             <div>
-              <label class="block font-serif uppercase tracking-wider text-slate-300 mb-1 font-semibold">Alamat Gereja Cabang</label>
-              <textarea v-model="form.address" rows="2" placeholder="Alamat lengkap lokasi gereja cabang" class="w-full px-3.5 py-2.5 bg-[#050918] border border-amber-500/30 rounded-xl text-white focus:outline-none focus:border-amber-400 resize-y"></textarea>
+              <label :class="['block font-serif uppercase tracking-wider mb-1 font-semibold transition-colors', isDark ? 'text-slate-300' : 'text-slate-700']">Alamat Gereja Cabang</label>
+              <textarea v-model="form.address" rows="2" placeholder="Alamat lengkap lokasi gereja cabang" :class="['w-full px-3.5 py-2.5 rounded-xl transition border focus:outline-none resize-y', isDark ? 'bg-[#050918] border-amber-500/30 text-white focus:border-amber-400' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500']"></textarea>
             </div>
 
-            <section class="rounded-2xl border border-cyan-500/30 bg-[#050918] p-3 sm:p-4">
+            <section :class="['rounded-2xl border p-3 sm:p-4 transition-colors', isDark ? 'border-cyan-500/30 bg-[#050918]' : 'border-sky-300 bg-sky-50/60 shadow-2xs']">
               <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-3">
                 <div>
-                  <h4 class="font-serif text-sm font-bold text-cyan-300 flex items-center gap-2">
-                    <i class="bi bi-geo-alt-fill"></i>
+                  <h4 :class="['font-serif text-sm font-bold flex items-center gap-2 transition-colors', isDark ? 'text-cyan-300' : 'text-sky-800 font-extrabold']">
+                    <i class="bi bi-geo-alt-fill text-amber-500"></i>
                     Lokasi Gereja Cabang
                   </h4>
-                  <p class="text-[10px] text-slate-400 mt-1">Klik peta atau geser pin untuk menentukan titik lokasi yang akurat.</p>
+                  <p :class="['text-[10px] mt-1 transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">Klik peta atau geser pin untuk menentukan titik lokasi yang akurat.</p>
                 </div>
                 <button
                   type="button"
                   @click="detectCurrentLocation"
                   :disabled="isLocating"
-                  class="inline-flex items-center justify-center gap-1.5 rounded-lg border border-cyan-400/40 bg-cyan-500/10 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-cyan-300 hover:bg-cyan-400 hover:text-slate-950 disabled:opacity-50 transition cursor-pointer"
+                  :class="[
+                    'inline-flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-[10px] font-bold uppercase tracking-wider disabled:opacity-50 transition cursor-pointer',
+                    isDark 
+                      ? 'border-cyan-400/40 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-400 hover:text-slate-950' 
+                      : 'border-sky-300 bg-white text-sky-800 hover:bg-sky-100 shadow-2xs'
+                  ]"
                 >
                   <i class="bi" :class="isLocating ? 'bi-arrow-clockwise animate-spin' : 'bi-crosshair'"></i>
                   {{ isLocating ? 'Mendeteksi...' : 'Gunakan Lokasi Saya' }}
                 </button>
               </div>
 
-              <div ref="mapContainer" class="branch-map rounded-xl overflow-hidden border border-slate-700"></div>
+              <div ref="mapContainer" :class="['branch-map rounded-xl overflow-hidden border', isDark ? 'border-slate-700' : 'border-slate-300 shadow-inner']"></div>
 
               <div class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px]">
-                <div class="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-slate-300 font-mono">
-                  <span class="text-slate-500">LAT:</span> {{ form.latitude ?? '-' }}
+                <div :class="['rounded-lg border px-3 py-2 font-mono transition-colors', isDark ? 'border-slate-700 bg-slate-900/70 text-slate-300' : 'border-slate-200 bg-white text-slate-800 shadow-2xs']">
+                  <span :class="isDark ? 'text-slate-500' : 'text-slate-400'">LAT:</span> {{ form.latitude ?? '-' }}
                 </div>
-                <div class="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-2 text-slate-300 font-mono">
-                  <span class="text-slate-500">LNG:</span> {{ form.longitude ?? '-' }}
+                <div :class="['rounded-lg border px-3 py-2 font-mono transition-colors', isDark ? 'border-slate-700 bg-slate-900/70 text-slate-300' : 'border-slate-200 bg-white text-slate-800 shadow-2xs']">
+                  <span :class="isDark ? 'text-slate-500' : 'text-slate-400'">LNG:</span> {{ form.longitude ?? '-' }}
                 </div>
               </div>
-              <p v-if="locationFeedback" class="mt-2 text-[10px] text-cyan-300 flex items-center gap-1.5">
+              <p v-if="locationFeedback" :class="['mt-2 text-[10px] flex items-center gap-1.5 transition-colors font-medium', isDark ? 'text-cyan-300' : 'text-sky-800']">
                 <i class="bi bi-info-circle"></i>{{ locationFeedback }}
               </p>
-              <a v-if="form.google_maps_url" :href="form.google_maps_url" target="_blank" rel="noopener noreferrer" class="mt-2 inline-flex items-center gap-1 text-[10px] text-sky-300 hover:text-sky-200 hover:underline">
+              <a v-if="form.google_maps_url" :href="form.google_maps_url" target="_blank" rel="noopener noreferrer" :class="['mt-2 inline-flex items-center gap-1 text-[10px] hover:underline transition-colors font-semibold', isDark ? 'text-sky-300 hover:text-sky-200' : 'text-sky-700 hover:text-sky-900']">
                 <i class="bi bi-box-arrow-up-right"></i> Buka titik ini di Google Maps
               </a>
             </section>
 
             <div>
-              <label class="block font-serif uppercase tracking-wider text-slate-300 mb-1 font-semibold">
+              <label :class="['block font-serif uppercase tracking-wider mb-1 font-semibold transition-colors', isDark ? 'text-slate-300' : 'text-slate-700']">
                 {{ isEditing ? 'Kata Sandi Baru (Kosongkan jika tidak diubah)' : 'Kata Sandi Akun *' }}
               </label>
-              <input v-model="form.password" :required="!isEditing" type="password" placeholder="••••••••••••" class="w-full px-3.5 py-2.5 bg-[#050918] border border-amber-500/30 rounded-xl text-white focus:outline-none focus:border-amber-400">
+              <input v-model="form.password" :required="!isEditing" type="password" placeholder="••••••••••••" :class="['w-full px-3.5 py-2.5 rounded-xl transition border focus:outline-none', isDark ? 'bg-[#050918] border-amber-500/30 text-white focus:border-amber-400' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-amber-500']">
             </div>
 
-            <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+            <div :class="['pt-3 border-t flex justify-end gap-2 transition-colors', isDark ? 'border-slate-800' : 'border-slate-200']">
               <button 
                 type="button" 
                 @click="isModalOpen = false" 
-                class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-serif uppercase tracking-wider rounded-xl transition cursor-pointer"
+                :class="['px-4 py-2 font-serif uppercase tracking-wider rounded-xl transition cursor-pointer border', isDark ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-transparent' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300']"
               >
                 Batal
               </button>
