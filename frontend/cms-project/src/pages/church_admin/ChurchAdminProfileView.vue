@@ -2,6 +2,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import ChurchAdminLayout from '@/layouts/ChurchAdminLayout.vue'
 import { useAuth } from '@/composables/useAuth'
+import { useTheme } from '@/composables/useTheme'
 import { APP_CONFIG } from '@/config'
 import { storage } from '@/utils'
 import { STORAGE_KEYS } from '@/constants'
@@ -9,6 +10,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
 const { user, setUser } = useAuth()
+const { isDark, themeMode, toggleTheme, setDark, setLight, setSystem, init: initTheme } = useTheme()
 
 // State Data Profil & DBMS
 const isLoading = ref(true)
@@ -86,6 +88,17 @@ const triggerToast = (msg, type = 'success') => {
   setTimeout(() => {
     showToast.value = false
   }, 4500)
+}
+
+// Fitur Penggantian Warna Gelap - Terang
+const handleToggleTheme = () => {
+  toggleTheme()
+  triggerToast(
+    isDark.value
+      ? 'Tema visual beralih ke Mode Gelap (Dark Mode) 🌙'
+      : 'Tema visual beralih ke Mode Terang (Light Mode) ☀️',
+    'info'
+  )
 }
 
 const formatDate = (dateStr) => {
@@ -543,6 +556,7 @@ const detectCurrentLocation = () => {
 }
 
 onMounted(() => {
+  initTheme()
   loadProfile()
 })
 
@@ -588,102 +602,225 @@ onUnmounted(() => {
       </div>
 
       <template v-else>
-        <!-- Header Banner & Hero Card -->
-        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#0b1329] via-[#0f172a] to-[#1c1917] border border-amber-500/30 p-6 sm:p-8 shadow-2xl">
+        <!-- Header Banner & Hero Card (Dengan Fitur Penggantian Warna Gelap - Terang) -->
+        <div
+          :class="[
+            'relative overflow-hidden rounded-3xl border shadow-xl transition-all duration-300',
+            isDark
+              ? 'bg-gradient-to-br from-[#0c1322] via-[#0f172a] to-[#16120b] border-amber-500/30 text-white shadow-black/40'
+              : 'bg-gradient-to-br from-amber-50/80 via-white to-sky-50/60 border-amber-300/60 text-slate-900 shadow-amber-500/5'
+          ]"
+        >
           <!-- Background Glow Effect -->
-          <div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-amber-500/10 blur-3xl pointer-events-none"></div>
-          <div class="absolute -left-20 -bottom-20 w-60 h-60 rounded-full bg-cyan-500/10 blur-3xl pointer-events-none"></div>
+          <div
+            :class="[
+              'absolute -right-20 -top-20 w-80 h-80 rounded-full blur-3xl pointer-events-none transition-all duration-500',
+              isDark ? 'bg-amber-500/10' : 'bg-amber-400/20'
+            ]"
+          ></div>
+          <div
+            :class="[
+              'absolute -left-20 -bottom-20 w-60 h-60 rounded-full blur-3xl pointer-events-none transition-all duration-500',
+              isDark ? 'bg-cyan-500/10' : 'bg-sky-400/15'
+            ]"
+          ></div>
 
-          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <!-- Left Info -->
-            <div class="flex items-start sm:items-center gap-4 sm:gap-6">
-              <!-- Avatar Inisial -->
-              <div class="relative shrink-0">
-                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-300 p-0.5 shadow-xl shadow-amber-500/20">
-                  <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center font-black text-amber-400 text-2xl sm:text-3xl tracking-tighter">
-                    {{ profileData.admin_name?.charAt(0) || 'A' }}
-                  </div>
-                </div>
-                <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-slate-900 shadow" title="Akun Aktif di DBMS"></div>
+          <div class="relative z-10 flex flex-col">
+            <!-- 1. Top Utility Header Bar (Zonasi Atas: Role Badge & Switcher Tema) -->
+            <div
+              :class="[
+                'flex items-center justify-between gap-4 px-6 py-3.5 sm:px-8 border-b transition-colors',
+                isDark ? 'border-white/5 bg-slate-950/40' : 'border-amber-500/10 bg-amber-50/40'
+              ]"
+            >
+              <!-- Role & Status Badges -->
+              <div class="flex items-center gap-2 flex-wrap">
+                <span
+                  :class="[
+                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border shadow-2xs transition-colors',
+                    isDark
+                      ? 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+                      : 'bg-amber-100 text-amber-900 border-amber-300'
+                  ]"
+                >
+                  <span>🛡️</span> Administrator Cabang
+                </span>
+
+                <span
+                  :class="[
+                    'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors',
+                    isDark
+                      ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                      : 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                  ]"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  {{ profileData.status || 'Aktif' }}
+                </span>
               </div>
 
-              <!-- Main Title & Branch -->
-              <div class="space-y-1.5">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-extrabold uppercase tracking-widest border border-amber-500/30">
-                    Administrator Cabang
-                  </span>
-                  <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30 flex items-center gap-1">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                    {{ profileData.status || 'Aktif' }}
-                  </span>
-                  <span v-if="profileData.church_code" class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono font-bold border border-cyan-500/30">
-                    Kode: {{ profileData.church_code }}
-                  </span>
-                  <!-- DBMS Badge -->
-                  <span
+              <!-- Fitur Penggantian Warna Gelap - Terang (Modern Segmented Switcher) -->
+              <div class="flex items-center gap-2">
+                <span :class="['text-[11px] font-bold hidden sm:inline transition-colors', isDark ? 'text-slate-400' : 'text-slate-600']">
+                  Tema:
+                </span>
+                <div
+                  class="inline-flex items-center p-0.5 rounded-xl border transition-all duration-300 shadow-2xs"
+                  :class="isDark ? 'bg-slate-950/80 border-slate-800' : 'bg-white border-amber-300/70'"
+                  role="group"
+                  aria-label="Pilihan Tema Gelap atau Terang"
+                >
+                  <button
+                    @click="!isDark && handleToggleTheme()"
+                    type="button"
+                    id="btn-theme-dark"
                     :class="[
-                      'px-2 py-0.5 rounded-full text-[10px] font-mono font-bold border flex items-center gap-1',
-                      dbmsStatus.connected
-                        ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-                        : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                      'px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer',
+                      isDark
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-sm font-extrabold'
+                        : 'text-slate-500 hover:text-slate-800'
                     ]"
+                    title="Aktifkan Mode Gelap (Dark Mode) 🌙"
                   >
-                    <span :class="['w-1.5 h-1.5 rounded-full', dbmsStatus.connected ? 'bg-blue-400' : 'bg-rose-400']"></span>
-                    DBMS: {{ dbmsStatus.connected ? 'PostgreSQL Live' : 'Disconnected' }}
-                  </span>
+                    <span>🌙</span>
+                    <span class="hidden sm:inline">Gelap</span>
+                  </button>
+                  <button
+                    @click="isDark && handleToggleTheme()"
+                    type="button"
+                    id="btn-theme-light"
+                    :class="[
+                      'px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all duration-200 cursor-pointer',
+                      !isDark
+                        ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 shadow-sm font-extrabold'
+                        : 'text-slate-400 hover:text-white'
+                    ]"
+                    title="Aktifkan Mode Terang (Light Mode) ☀️"
+                  >
+                    <span>☀️</span>
+                    <span class="hidden sm:inline">Terang</span>
+                  </button>
                 </div>
-
-                <h1 class="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight">
-                  {{ profileData.admin_name }}
-                </h1>
-
-                <p class="text-xs sm:text-sm text-amber-400/90 font-medium flex items-center gap-1.5">
-                  <span class="text-base">⛪</span>
-                  <strong class="text-white">{{ profileData.church_name }}</strong>
-                  <span v-if="profileData.city" class="text-slate-400">({{ profileData.city }})</span>
-                </p>
               </div>
             </div>
 
-            <!-- Action Buttons (CRUD Controls) -->
-            <div class="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
-              <!-- Tombol Sinkronisasi DBMS (READ Refetch) -->
-              <button
-                @click="loadProfile(true)"
-                :disabled="isSyncing"
-                title="Muat ulang dan sinkronkan data langsung dari basis data PostgreSQL"
-                class="px-3.5 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-cyan-300 hover:text-cyan-200 border border-cyan-500/30 font-bold text-xs flex items-center gap-1.5 transition-all duration-200 cursor-pointer shadow disabled:opacity-50"
-              >
-                <svg :class="['w-4 h-4', isSyncing ? 'animate-spin text-cyan-400' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                <span>{{ isSyncing ? 'Sinkronisasi...' : 'Sinkronkan DBMS' }}</span>
-              </button>
+            <!-- 2. Main Hero Profile Area (Zonasi Utama: Avatar, Identitas & Tombol Aksi) -->
+            <div class="p-6 sm:p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <!-- Left Info: Avatar + Details -->
+              <div class="flex items-center gap-4 sm:gap-6 min-w-0">
+                <!-- Avatar Inisial -->
+                <div class="relative shrink-0">
+                  <div class="w-18 h-18 sm:w-22 sm:h-22 rounded-2xl bg-gradient-to-tr from-amber-600 via-amber-500 to-yellow-300 p-0.5 shadow-xl shadow-amber-500/20">
+                    <div
+                      :class="[
+                        'w-full h-full rounded-[14px] flex items-center justify-center font-black text-2xl sm:text-3xl tracking-tighter transition-colors',
+                        isDark ? 'bg-slate-950 text-amber-400' : 'bg-white text-amber-600 shadow-sm'
+                      ]"
+                    >
+                      {{ profileData.admin_name?.charAt(0) || 'A' }}
+                    </div>
+                  </div>
+                  <div
+                    class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 shadow flex items-center justify-center"
+                    :class="isDark ? 'border-slate-900' : 'border-white'"
+                    title="Akun Aktif di DBMS"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+                  </div>
+                </div>
 
-              <!-- Tombol Edit Profil (UPDATE) -->
-              <button
-                @click="openEditModal"
-                id="btn-edit-church-profile"
-                class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                </svg>
-                <span>Edit Profil (CRUD)</span>
-              </button>
+                <!-- Main Title & Affiliation -->
+                <div class="space-y-1.5 min-w-0">
+                  <h1
+                    :class="[
+                      'text-xl sm:text-2xl lg:text-3xl font-extrabold tracking-tight truncate transition-colors',
+                      isDark ? 'text-white' : 'text-slate-900'
+                    ]"
+                  >
+                    {{ profileData.admin_name }}
+                  </h1>
 
-              <!-- Tombol Ubah Sandi -->
-              <button
-                @click="openPasswordModal"
-                id="btn-change-password"
-                class="px-4 py-2.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700 hover:border-amber-500/40 font-bold text-xs flex items-center gap-2 transition-all duration-200 cursor-pointer shadow"
-              >
-                <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                </svg>
-                <span>Ubah Sandi</span>
-              </button>
+                  <div
+                    :class="[
+                      'flex items-center gap-2 sm:gap-3 flex-wrap text-xs sm:text-sm font-medium transition-colors',
+                      isDark ? 'text-slate-300' : 'text-slate-700'
+                    ]"
+                  >
+                    <span
+                      class="inline-flex items-center gap-1.5 font-bold"
+                      :class="isDark ? 'text-amber-400' : 'text-amber-800'"
+                    >
+                      <span class="text-base leading-none">⛪</span>
+                      {{ profileData.church_name }}
+                    </span>
+
+                    <span v-if="profileData.city" class="inline-flex items-center gap-1 opacity-85">
+                      <span>📍</span> {{ profileData.city }}
+                    </span>
+
+                    <span
+                      v-if="profileData.church_code"
+                      :class="[
+                        'px-2 py-0.5 rounded-md font-mono text-[10px] font-bold border transition-colors',
+                        isDark ? 'bg-slate-950/80 text-cyan-300 border-cyan-500/30' : 'bg-white text-sky-800 border-sky-300 shadow-2xs'
+                      ]"
+                    >
+                      Kode: {{ profileData.church_code }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Actions: CRUD Controls -->
+              <div class="flex items-center gap-2.5 flex-wrap sm:flex-nowrap shrink-0">
+                <!-- Tombol Sinkronisasi DBMS (READ Refetch) -->
+                <button
+                  @click="loadProfile(true)"
+                  :disabled="isSyncing"
+                  title="Muat ulang dan sinkronkan data langsung dari basis data PostgreSQL"
+                  :class="[
+                    'px-3.5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border transition-all duration-200 cursor-pointer shadow-xs disabled:opacity-50',
+                    isDark
+                      ? 'bg-slate-900/90 hover:bg-slate-800 text-cyan-300 hover:text-cyan-200 border-cyan-500/30'
+                      : 'bg-white hover:bg-sky-50 text-sky-800 hover:text-sky-900 border-sky-300'
+                  ]"
+                >
+                  <svg :class="['w-4 h-4', isSyncing ? 'animate-spin text-cyan-400' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                  </svg>
+                  <span class="hidden sm:inline">{{ isSyncing ? 'Sinkronisasi...' : 'Sinkronkan DBMS' }}</span>
+                  <span class="sm:hidden">Sinkron</span>
+                </button>
+
+                <!-- Tombol Ubah Sandi -->
+                <button
+                  @click="openPasswordModal"
+                  id="btn-change-password"
+                  :class="[
+                    'px-3.5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 border transition-all duration-200 cursor-pointer shadow-xs',
+                    isDark
+                      ? 'bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white border-slate-700 hover:border-amber-500/40'
+                      : 'bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border-slate-300 hover:border-amber-400'
+                  ]"
+                >
+                  <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                  </svg>
+                  <span>Ubah Sandi</span>
+                </button>
+
+                <!-- Tombol Edit Profil (UPDATE) -->
+                <button
+                  @click="openEditModal"
+                  id="btn-edit-church-profile"
+                  class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all duration-200 cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                  </svg>
+                  <span>Edit Profil (CRUD)</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -341,6 +341,7 @@ html.light {
   [class*="from-[#123138]"],
   [class*="from-[#0d1e27]"],
   [class*="from-[#09151e]"],
+  [class*="from-[#0b1329]"],
   [class*="from-slate-950"],
   [class*="from-slate-900"] {
     --tw-gradient-from: #ffffff var(--tw-gradient-from-position) !important;
@@ -350,6 +351,7 @@ html.light {
   [class*="via-[#101c3a]"],
   [class*="via-[#0b2027]"],
   [class*="via-[#0B2027]"],
+  [class*="via-[#0f172a]"],
   [class*="via-slate-900"] {
     --tw-gradient-stops: var(--tw-gradient-from), #e0f2fe var(--tw-gradient-via-position, 50%), var(--tw-gradient-to) !important;
   }
@@ -363,6 +365,7 @@ html.light {
   [class*="to-[#123138]"],
   [class*="to-[#09151e]"],
   [class*="to-[#0d1e27]"],
+  [class*="to-[#1c1917]"],
   [class*="to-slate-950"],
   [class*="to-slate-900"] {
     --tw-gradient-to: #f0f9ff var(--tw-gradient-to-position) !important;
